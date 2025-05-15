@@ -9,13 +9,26 @@ import { useAppDispatch, useAppSelector } from '@/components/Redux/hooks';
 import { addToCart } from '@/components/Redux/features/cart/cartSlice';
 import { toast } from 'sonner';
 import AddToWishlistButton from '@/components/DashboardLayout/Wishlist/AddToWishlistButton';
+import { Rating } from '@smastrom/react-rating';
+import "@smastrom/react-rating/style.css";
+import { useGetUserQuery } from '@/components/Redux/features/user/useApi';
+import ReviewCard from '../Reviews/ReviewCard';
+import { useForm } from 'react-hook-form';
+import { useCreateReviewMutation } from '@/components/Redux/features/review/reviewApi';
+
+interface ReviewFormData {
+    rating: number;
+    reviewText: string;
+}
 
 const ProductDetails = () => {
     const { id } = useParams();
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user } = useAppSelector((state) => state.auth);
-    const { data: product, isLoading, isError } = useSingleProductQuery(id);
+    const { user }: any = useAppSelector((state) => state.auth);
+    const [addReview] = useCreateReviewMutation();
+    const { data: product, isLoading, isError, refetch: refetchProductDetails } = useSingleProductQuery(id);
+    const { data: SingleUser } = useGetUserQuery(user?.id);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [activeTab, setActiveTab] = useState('description');
@@ -24,10 +37,16 @@ const ProductDetails = () => {
     const [reviewName, setReviewName] = useState('');
     const [reviewEmail, setReviewEmail] = useState('');
 
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm<ReviewFormData>();
+
     if (isLoading) return <div className='flex justify-center items-center text-2xl font-bold pt-10'>Loading...</div>;
     if (isError) return <div>Error loading product details</div>;
     if (!product || !product.data) return <div>No product data available</div>;
-
 
     const { images, name, price, description, weight, dimensions, origin, brand, category } = product.data;
 
@@ -52,7 +71,7 @@ const ProductDetails = () => {
 
     const handleAddToCart = () => {
         if (!handleAuthCheck()) return;
-        
+
         dispatch(addToCart({
             id: id as string,
             name,
@@ -66,7 +85,7 @@ const ProductDetails = () => {
 
     const handleBuyNow = () => {
         if (!handleAuthCheck()) return;
-        
+
         dispatch(addToCart({
             id: id as string,
             name,
@@ -77,15 +96,40 @@ const ProductDetails = () => {
         router.push('/checkout');
     };
 
-    const handleSubmitReview = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!handleAuthCheck()) return;
-        
-        toast.success('Your review has been submitted!');
-        setReviewText('');
-        setRating(5);
-        setReviewName('');
-        setReviewEmail('');
+    const onSubmit = async (data: ReviewFormData) => {
+        const toastId = toast.loading("Adding Review...");
+        if (!user.id) {
+            toast.error("User information not available. Please try again later.", {
+                id: toastId,
+            });
+            return;
+        }
+
+        try {
+            const reviewData = {
+                rating: rating,
+                reviewText: data.reviewText,
+                productId: product.data.id,
+            };
+
+            const res = await addReview(reviewData).unwrap();
+
+            if (res?.success) {
+                toast.success(res?.message || "Your review is Pending", {
+                    id: toastId,
+                });
+                reset();
+                setRating(0);
+                refetchProductDetails();
+            } else {
+                toast.error(res?.message || "Failed to add review", { id: toastId });
+            }
+        } catch (error: any) {
+            console.error("Review submission error:", error);
+            toast.error(error?.data?.message || "Something went wrong", {
+                id: toastId,
+            });
+        }
     };
 
     const tabContent = {
@@ -128,72 +172,73 @@ const ProductDetails = () => {
             <div>
                 <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
                 <div className="space-y-6">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-600 mb-4">No reviews yet. Be the first to review this product!</p>
-                    </div>
-                    
-                    <div className="bg-white p-6 rounded-lg border border-gray-200">
-                        <h4 className="text-lg font-semibold mb-4">Write a Review</h4>
-                        <form onSubmit={handleSubmitReview} className="space-y-4">
-                            <div>
-                                <label htmlFor="rating" className="block mb-2 font-medium">Rating</label>
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button 
-                                            key={star}
-                                            type="button"
-                                            onClick={() => setRating(star)}
-                                            className="text-2xl"
-                                        >
-                                            {star <= rating ? '★' : '☆'}
-                                        </button>
-                                    ))}
+
+
+                    <div className="bg-white rounded-lg">
+                        {user ? <>
+                            <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
+                                {/* Rating Component */}
+                                <div className="flex items-center gap-1">
+                                    <Rating
+                                        style={{ maxWidth: 120 }}
+                                        value={rating}
+                                        onChange={setRating}
+                                        halfFillMode="box"
+                                        transition="colors"
+                                    />
+                                    <span className="text-yellow-400">{rating}/5</span>
                                 </div>
-                            </div>
-                            
-                            <div>
-                                <label htmlFor="name" className="block mb-2 font-medium">Your Name</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={reviewName}
-                                    onChange={(e) => setReviewName(e.target.value)}
-                                    className="w-full p-2 border rounded-md focus:ring-orange-500 focus:border-orange-500"
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label htmlFor="email" className="block mb-2 font-medium">Your Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={reviewEmail}
-                                    onChange={(e) => setReviewEmail(e.target.value)}
-                                    className="w-full p-2 border rounded-md focus:ring-orange-500 focus:border-orange-500"
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label htmlFor="review" className="block mb-2 font-medium">Your Review</label>
+                                {/* Review Textarea */}
                                 <textarea
-                                    id="review"
+                                    className="w-full mt-4 p-2 outline-none focus:border-blue-500 transition-all duration-300 border border-gray-600 rounded"
                                     rows={4}
-                                    value={reviewText}
-                                    onChange={(e) => setReviewText(e.target.value)}
-                                    className="w-full p-2 border rounded-md focus:ring-orange-500 focus:border-orange-500"
-                                    required
-                                ></textarea>
-                            </div>
-                            
-                            <button 
-                                type="submit"
-                                className="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors"
-                            >
-                                Submit Review
-                            </button>
-                        </form>
+                                    placeholder="Your review *"
+                                    {...register("reviewText", { required: "Review is required" })}
+                                />
+                                {errors.reviewText && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.reviewText.message}
+                                    </p>
+                                )}
+
+                                {/* Checkbox for saving info */}
+
+                                {/* <div className="mt-4">
+ 
+              <label className="text-sm">
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={isChecked}
+                  onChange={(e) => setIsChecked(e.target.checked)}
+                />
+                Save my name, email, and website in this browser for the next
+                time I comment.
+              </label>
+ 
+            </div> */}
+
+                                {/* Submit Button */}
+                                <br />
+                                <button
+                                    type="submit"
+                                    disabled={!user?.id || rating === 0}
+                                    className="mt-4 px-10 py-3 cursor-pointer bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg shadow-lg hover:-translate-y-1 hover:shadow-orange-600/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {!user?.id ? "Loading user data..." : "Submit"}
+                                </button>
+                            </form>
+
+                        </> : <></>}
+
+                        {/* Display Submitted Review */}
+                        <div className="mt-10">
+                            <ReviewCard
+                                ReviewData={product.data.reviews}
+                                UserData={user?.id ? SingleUser?.data : null}
+                                onReviewUpdate={refetchProductDetails}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,7 +251,7 @@ const ProductDetails = () => {
                 {/* Product Images */}
                 <div className="flex-1">
                     <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden">
-                        <Image 
+                        <Image
                             src={images[selectedImage]}
                             alt="Product Image"
                             fill
@@ -215,8 +260,8 @@ const ProductDetails = () => {
                     </div>
                     <div className="grid grid-cols-4 gap-2 mt-4">
                         {images.map((image: string, idx: number) => (
-                            <div 
-                                key={idx} 
+                            <div
+                                key={idx}
                                 className={`relative h-16 sm:h-20 md:h-24 rounded-md overflow-hidden cursor-pointer border ${selectedImage === idx ? 'border-orange-500' : 'hover:border-orange-500'}`}
                                 onClick={() => setSelectedImage(idx)}
                             >
@@ -237,7 +282,7 @@ const ProductDetails = () => {
                         <h1 className="text-2xl sm:text-3xl font-semibold">{name}</h1>
                         <AddToWishlistButton item={{ id: id as string, name, price, image: images[selectedImage] }} />
                     </div>
-                    
+
                     <div className="flex items-center gap-4">
                         <span className="text-xl sm:text-2xl font-bold text-orange-500">৳{price.toLocaleString()}</span>
                     </div>
@@ -250,14 +295,14 @@ const ProductDetails = () => {
                     <div className="flex items-center gap-4">
                         <span className="font-medium">Quantity:</span>
                         <div className="flex items-center border rounded-md">
-                            <button 
+                            <button
                                 onClick={handleDecrement}
                                 className="p-2 hover:bg-gray-100"
                             >
                                 <FiMinus />
                             </button>
                             <span className="px-4 py-2 border-x">{quantity}</span>
-                            <button 
+                            <button
                                 onClick={handleIncrement}
                                 className="p-2 hover:bg-gray-100"
                             >
@@ -267,7 +312,7 @@ const ProductDetails = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3">
-                        <button 
+                        <button
                             onClick={handleAddToCart}
                             className="flex items-center justify-center gap-2 w-full bg-orange-500 text-white py-2 sm:py-3 rounded-md hover:bg-orange-600 transition-colors"
                         >
@@ -275,7 +320,7 @@ const ProductDetails = () => {
                             Add to Cart
                         </button>
 
-                        <button 
+                        <button
                             onClick={handleBuyNow}
                             className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-2 sm:py-3 rounded-md hover:bg-green-600 transition-colors"
                         >
@@ -292,11 +337,10 @@ const ProductDetails = () => {
                     {['description', 'additional', 'reviews'].map((tab) => (
                         <button
                             key={tab}
-                            className={`flex items-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-6 text-sm sm:text-base font-medium transition-colors ${
-                                activeTab === tab
-                                    ? 'text-orange-500 border-b-2 border-orange-500'
-                                    : 'text-gray-500 hover:text-orange-500'
-                            }`}
+                            className={`flex items-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-6 text-sm sm:text-base font-medium transition-colors ${activeTab === tab
+                                ? 'text-orange-500 border-b-2 border-orange-500'
+                                : 'text-gray-500 hover:text-orange-500'
+                                }`}
                             onClick={() => setActiveTab(tab)}
                         >
                             {tab === 'description' && <FiInfo />}
