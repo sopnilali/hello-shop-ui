@@ -11,7 +11,7 @@ const slides = [
     heading: "Fresh & Delicious Khirsapat Mangoes",
     subheading: "Enjoy the king of mangoes, handpicked and delivered fresh to your doorstep.",
     button: "Shop Khirsapat",
-    link: "/products/khirsapat",
+    link: "/product",
     background: "https://tds-images.thedailystar.net/sites/default/files/styles/very_big_201/public/feature/images/khirsapat.jpg"
   },
   {
@@ -19,24 +19,24 @@ const slides = [
     heading: "Juicy Amrupali Mangoes",
     subheading: "Taste the sweetness of Amrupali, perfect for your summer cravings.",
     button: "Shop Amrupali",
-    link: "/products/amrupali",
-    background: "https://example.com/amrupali-background.jpg"
+    link: "/product?brandId=fac51e15-986d-4191-b685-edccc5ad71c9",
+    background: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtsWT7UbqxibmIZIzNdD0CIiGF1mBdqjHJ_A&s"
   },
   {
     image: "https://bazaarmantri.com/images/products/40670.jpg",
     heading: "Fajli Mangoes - Big & Bold",
     subheading: "Big in size, bold in flavor. Fajli mangoes are a must-try!",
     button: "Shop Fajli",
-    link: "/products/fajli",
-    background: "https://example.com/fajli-background.jpg"
+    link: "/product?brandId=984d6ebd-4c62-432e-837b-da8d1a9a9cad",
+    background: "https://tds-images.thedailystar.net/sites/default/files/styles/very_big_201/public/images/2022/05/25/capainawabganj.jpg"
   },
   {
     image: "https://borobagan.com/wp-content/uploads/2022/05/dsa.png",
     heading: "Gopalvog Mangoes",
     subheading: "A local favorite, Gopalvog mangoes are known for their unique taste.",
     button: "Shop Gopalvog",
-    link: "/products/gopalvog",
-    background: "https://example.com/gopalvog-background.jpg"
+    link: "/product?brandId=bf5130dc-3d24-462e-b713-23e3a7babe59",
+    background: "https://today.thefinancialexpress.com.bd/uploads/1559152134.jpg"
   },
 ];
 
