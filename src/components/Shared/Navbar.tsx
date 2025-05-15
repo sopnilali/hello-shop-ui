@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FiGrid, FiLogOut, FiShoppingCart, FiUser } from "react-icons/fi";
+import { FiGrid, FiLogOut, FiShoppingCart, FiUser, FiX, FiPlus, FiMinus, FiTrash2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../Redux/hooks";
 import { setUser } from "../Redux/features/auth/authSlice";
+import { removeFromCart, updateQuantity } from "../Redux/features/cart/cartSlice";
 import Cookies from 'js-cookie';
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useGetUserQuery } from "../Redux/features/user/useApi";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -27,12 +28,13 @@ const navLinks = [
 ];
 
 const Navbar = () => {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isSticky, setIsSticky] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
   const router = useRouter();
+  const cartModalRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
 
@@ -56,6 +58,19 @@ const Navbar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartModalRef.current && !cartModalRef.current.contains(event.target as Node)) {
+        setCartModalOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleLogout = () => {
     Cookies.remove('accessToken');
     dispatch(setUser({
@@ -75,6 +90,34 @@ const Navbar = () => {
   const handleProfileClick = () => {
     router.push('/profile');
     setUserMenuOpen(false);
+  };
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCartModalOpen(true);
+  };
+
+  const handleCheckout = () => {
+    setCartModalOpen(false);
+    router.push('/checkout');
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    dispatch(removeFromCart(itemId));
+    toast.success('Item removed from cart');
+  };
+
+  const handleIncreaseQuantity = (itemId: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (item) {
+      dispatch(updateQuantity({ id: itemId, quantity: item.quantity + 1 }));
+    }
+  };
+
+  const handleDecreaseQuantity = (itemId: string, currentQuantity: number) => {
+    if (currentQuantity > 1) {
+      dispatch(updateQuantity({ id: itemId, quantity: currentQuantity - 1 }));
+    }
   };
 
   return (
@@ -115,10 +158,10 @@ const Navbar = () => {
           <div className="flex-1 flex items-center justify-end gap-4">
             {/* Cart Icon */}
             <div className="relative">
-              <Link href="/cart" className="relative">
-                <FiShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-2 -right-2 bg-[#ff4500] text-white text-xs rounded-full px-1.5">{items.length}</span>
-              </Link>
+              <button onClick={handleCartClick} className="relative p-2">
+                <FiShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
+                <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-[#ff4500] text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">{items.length}</span>
+              </button>
             </div>
             {/* User Icon as Button */}
             <div className="relative">
@@ -214,6 +257,131 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Cart Modal */}
+        <AnimatePresence>
+          {cartModalOpen && (
+            <>
+              <motion.div
+                className="fixed inset-0 bg-black/40 z-40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setCartModalOpen(false)}
+              />
+              <motion.div
+                ref={cartModalRef}
+                className="fixed top-0 right-0 h-full w-80 md:w-96 bg-white shadow-2xl z-50 flex flex-col overflow-hidden"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
+              >
+                <div className="flex items-center justify-between p-4 border-b">
+                  <h2 className="text-xl font-bold">Your Cart ({items.length})</h2>
+                  <button
+                    onClick={() => setCartModalOpen(false)}
+                    className="text-gray-500 hover:text-[#ff4500] transition-colors"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <FiShoppingCart size={48} className="text-gray-300 mb-4" />
+                      <p className="text-gray-500 mb-4">Your cart is empty</p>
+                      <button
+                        onClick={() => {
+                          setCartModalOpen(false);
+                          router.push('/product');
+                        }}
+                        className="bg-[#ff4500] hover:bg-[#e63e00] text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      >
+                        Start Shopping
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {items.map((item: any) => (
+                        <div key={item.id} className="flex gap-3 border-b pb-3">
+                          <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0">
+                            {item.images && item.images[0] && (
+                              <Image
+                                src={item.images[0]}
+                                alt={item.name}
+                                fill
+                                className="object-cover"
+                              />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <h3 className="font-medium text-sm line-clamp-2">{item.name}</h3>
+                              <button 
+                                onClick={() => handleRemoveItem(item.id)}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                              >
+                                <FiTrash2 size={16} />
+                              </button>
+                            </div>
+                            <p className="text-[#ff4500] font-bold mt-1">৳{item.price}</p>
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="flex items-center border rounded-md">
+                                <button 
+                                  onClick={() => handleDecreaseQuantity(item.id, item.quantity)}
+                                  className="p-1 hover:bg-gray-100 text-gray-500"
+                                  disabled={item.quantity <= 1}
+                                >
+                                  <FiMinus size={14} />
+                                </button>
+                                <span className="px-2 py-1 text-sm">{item.quantity}</span>
+                                <button 
+                                  onClick={() => handleIncreaseQuantity(item.id)}
+                                  className="p-1 hover:bg-gray-100 text-gray-500"
+                                >
+                                  <FiPlus size={14} />
+                                </button>
+                              </div>
+                              <p className="text-gray-600 text-sm">৳{(item.price * item.quantity).toFixed(2)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {items.length > 0 && (
+                  <div className="p-4 border-t">
+                    <div className="flex justify-between mb-4">
+                      <span className="font-medium">Subtotal:</span>
+                      <span className="font-bold">৳{items.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <Link href="/cart" className="flex-1">
+                        <button
+                          onClick={() => setCartModalOpen(false)}
+                          className="w-full border border-[#ff4500] text-[#ff4500] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                          View Cart
+                        </button>
+                      </Link>
+                      <button
+                        onClick={handleCheckout}
+                        className="flex-1 bg-[#ff4500] hover:bg-[#e63e00] text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      >
+                        Checkout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </>
           )}

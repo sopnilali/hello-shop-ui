@@ -194,8 +194,8 @@ const AllProducts: React.FC = () => {
                 key={brand.id}
                 type="button"
                 className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md border transition-colors ${checked
-                    ? 'bg-orange-100 border-orange-500 text-orange-700 font-semibold'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-orange-50'
+                  ? 'bg-orange-100 border-orange-500 text-orange-700 font-semibold'
+                  : 'bg-white border-gray-300 text-gray-700 hover:bg-orange-50'
                   }`}
                 onClick={() => handleBrandPick(brand.id)}
               >
@@ -221,8 +221,8 @@ const AllProducts: React.FC = () => {
                 key={category.id}
                 type="button"
                 className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md border transition-colors ${checked
-                    ? 'bg-orange-100 border-orange-500 text-orange-700 font-semibold'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-orange-50'
+                  ? 'bg-orange-100 border-orange-500 text-orange-700 font-semibold'
+                  : 'bg-white border-gray-300 text-gray-700 hover:bg-orange-50'
                   }`}
                 onClick={() => handleCategoryPick(category.id)}
               >
@@ -377,8 +377,8 @@ const AllProducts: React.FC = () => {
                     />
                   </div>
                   <div className="p-5">
-                    <Link href={`/product/${product.id}`} className="block">
-                      <h3 className="text-xl font-semibold mb-2 text-gray-800 truncate">{product.name}</h3>
+                    <div className="block">
+                      <Link href={`/product/${product.id}`} className="text-xl font-semibold mb-2 hover:text-orange-600 text-gray-800 transition-colors duration-300">{product.name}</Link>
                       <div className="flex justify-between items-center">
                         <p className="text-lg font-bold text-orange-600">৳{product.price.toFixed(2)}</p>
                         <div className="flex gap-2">
@@ -390,7 +390,7 @@ const AllProducts: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   </div>
                 </div>
               )
