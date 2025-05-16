@@ -122,20 +122,20 @@ const Navbar = () => {
 
   return (
     <>
-      {isSticky && <div style={{ height: '72px' }} />} {/* Placeholder div to prevent content jump */}
-      <nav className={`w-full flex items-center px-8 py-4 bg-white shadow-sm z-50 transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0' : ''}`}>
-        <div className="container mx-auto flex items-center">
+      {isSticky && <div style={{ height: '72px' }} />}
+      <nav className={`w-full flex items-center  px-2 sm:px-4 lg:px-8 py-4 bg-white shadow-sm z-50 transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0' : ''}`}>
+        <div className="container mx-auto flex items-center justify-between">
           {/* Logo */}
-          <div className="flex-1 flex items-center">
-            <Link href="/" className="flex items-center text-2xl font-bold text-black">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center text-xl sm:text-2xl font-bold text-black">
               Hello
-              <span className="text-[#ff4500] rotate-12 inline-block" style={{ fontSize: 28, margin: "0 2px" }}>✔</span>
+              <span className="text-[#ff4500] rotate-12 inline-block" style={{ fontSize: 24, margin: "0 2px" }}>✔</span>
               Shop
             </Link>
           </div>
           {/* Nav Links Centered (desktop only) */}
-          <div className="flex-1 hidden md:flex justify-center">
-            <div className="flex items-center gap-8 text-base font-medium">
+          <div className="hidden md:flex justify-center flex-1 mx-4">
+            <div className="flex items-center gap-6 lg:gap-8 text-base font-medium">
               {navLinks.map((link) =>
                 <div key={link.name} className="relative group">
                   <Link
@@ -155,7 +155,7 @@ const Navbar = () => {
             </div>
           </div>
           {/* Actions Right */}
-          <div className="flex-1 flex items-center justify-end gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Cart Icon */}
             <div className="relative">
               <button onClick={handleCartClick} className="relative p-2">
@@ -201,16 +201,16 @@ const Navbar = () => {
                 </>
               ) : (
                 <Link href="/login">
-                  <button className="bg-[#ff4500] hover:bg-[#e63e00] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors">
-                    <FiUser className="w-5 h-5" />
+                  <button className="bg-[#ff4500] hover:bg-[#e63e00] text-white px-3 sm:px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors text-sm sm:text-base">
+                    <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
                     Login
                   </button>
                 </Link>
               )}
             </div>
-            {/* Hamburger for mobile (right) */}
+            {/* Hamburger for mobile */}
             <button
-              className="md:hidden text-2xl p-2 focus:outline-none ml-2"
+              className="md:hidden text-2xl p-2 focus:outline-none"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label="Toggle menu"
             >

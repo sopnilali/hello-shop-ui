@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FiMinus, FiPlus, FiShoppingCart, FiCreditCard, FiInfo, FiList, FiStar } from 'react-icons/fi';
+import { FiMinus, FiPlus, FiShoppingCart, FiCreditCard, FiInfo, FiList, FiStar, FiShare, FiMessageSquare, FiX, FiUser, FiMail, FiPhone } from 'react-icons/fi';
 import { useParams, useRouter } from 'next/navigation';
 import { useSingleProductQuery } from '@/components/Redux/features/products/productsApi';
 import { useAppDispatch, useAppSelector } from '@/components/Redux/hooks';
@@ -15,6 +15,7 @@ import { useGetUserQuery } from '@/components/Redux/features/user/useApi';
 import ReviewCard from '../Reviews/ReviewCard';
 import { useForm } from 'react-hook-form';
 import { useCreateReviewMutation } from '@/components/Redux/features/review/reviewApi';
+import { FaWhatsapp } from 'react-icons/fa';
 
 interface ReviewFormData {
     rating: number;
@@ -36,6 +37,8 @@ const ProductDetails = () => {
     const [rating, setRating] = useState(5);
     const [reviewName, setReviewName] = useState('');
     const [reviewEmail, setReviewEmail] = useState('');
+    const [enquiryMessage, setEnquiryMessage] = useState('');
+    const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState(false);
 
     const {
         register,
@@ -44,7 +47,79 @@ const ProductDetails = () => {
         reset,
     } = useForm<ReviewFormData>();
 
-    if (isLoading) return <div className='flex justify-center items-center text-2xl font-bold pt-10'>Loading...</div>;
+    if (isLoading) return (
+        <div className='w-full overflow-x-hidden bg-gray-50'>
+            <div className='container mx-auto px-2 sm:px-6 py-6 sm:py-8 lg:py-8'>
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Image Skeleton */}
+                    <div className="flex-1">
+                        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg bg-gray-200 animate-pulse"></div>
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                            {[1, 2, 3, 4].map((idx) => (
+                                <div key={idx} className="relative h-16 sm:h-20 md:h-24 rounded-md bg-gray-200 animate-pulse"></div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Info Skeleton */}
+                    <div className="flex-1 space-y-4 mt-6 md:mt-0">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <div className="h-8 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-8 bg-gray-200 rounded w-8 animate-pulse"></div>
+                        </div>
+
+                        <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+
+                        <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+                            <div className="h-20 bg-gray-200 rounded w-full animate-pulse"></div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                            <div className="flex items-center border rounded-md">
+                                <div className="h-10 w-24 bg-gray-200 animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="h-12 bg-gray-200 rounded w-full animate-pulse"></div>
+                            <div className="h-12 bg-gray-200 rounded w-full animate-pulse"></div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-100 rounded-lg">
+                            <div className="space-y-2 w-full">
+                                <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+                                <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                                <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                            </div>
+                            <div className="flex gap-2 w-full sm:w-auto">
+                                <div className="h-10 bg-gray-200 rounded w-full sm:w-24 animate-pulse"></div>
+                                <div className="h-10 bg-gray-200 rounded w-full sm:w-24 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs Skeleton */}
+                <div className="mt-12">
+                    <div className="flex border-b">
+                        {[1, 2, 3].map((idx) => (
+                            <div key={idx} className="h-10 bg-gray-200 rounded-t-lg w-24 mx-1 animate-pulse"></div>
+                        ))}
+                    </div>
+                    <div className="mt-6 bg-white p-4 sm:p-6 rounded-lg">
+                        <div className="space-y-4">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     if (isError) return <div>Error loading product details</div>;
     if (!product || !product.data) return <div>No product data available</div>;
 
@@ -132,6 +207,17 @@ const ProductDetails = () => {
         }
     };
 
+    const handleSendEnquiry = () => {
+        if (!enquiryMessage.trim()) {
+            toast.error('Please enter a message');
+            return;
+        }
+        // Add your enquiry sending logic here
+        toast.success('Message sent to seller');
+        setEnquiryMessage('');
+        setIsEnquiryModalOpen(false);
+    };
+
     const tabContent = {
         description: (
             <div className="prose max-w-none">
@@ -146,11 +232,7 @@ const ProductDetails = () => {
                     <tbody>
                         <tr className="border-b">
                             <td className="py-2 font-medium">Weight</td>
-                            <td className="py-2">{weight || '500g'}</td>
-                        </tr>
-                        <tr className="border-b">
-                            <td className="py-2 font-medium">Dimensions</td>
-                            <td className="py-2">{dimensions || '10 × 10 × 10 cm'}</td>
+                            <td className="py-2">{weight || '500g'}kg</td>
                         </tr>
                         <tr className="border-b">
                             <td className="py-2 font-medium">Origin</td>
@@ -246,112 +328,200 @@ const ProductDetails = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* Product Images */}
-                <div className="flex-1">
-                    <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden">
-                        <Image
-                            src={images[selectedImage]}
-                            alt="Product Image"
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 mt-4">
-                        {images.map((image: string, idx: number) => (
-                            <div
-                                key={idx}
-                                className={`relative h-16 sm:h-20 md:h-24 rounded-md overflow-hidden cursor-pointer border ${selectedImage === idx ? 'border-orange-500' : 'hover:border-orange-500'}`}
-                                onClick={() => setSelectedImage(idx)}
-                            >
-                                <Image
-                                    src={image}
-                                    alt={`Thumbnail ${idx + 1}`}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Product Info */}
-                <div className="flex-1 space-y-4 mt-6 md:mt-0">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                        <h1 className="text-2xl sm:text-3xl font-semibold">{name}</h1>
-                        <AddToWishlistButton item={{ id: id as string, name, price, image: images[selectedImage] }} />
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-xl sm:text-2xl font-bold text-orange-500">৳{price.toLocaleString()}</span>
-                    </div>
-
-                    <div className="space-y-2">
-                        <h3 className="font-medium">Description:</h3>
-                        <p className="text-gray-600 text-sm sm:text-base">{description}</p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="font-medium">Quantity:</span>
-                        <div className="flex items-center border rounded-md">
-                            <button
-                                onClick={handleDecrement}
-                                className="p-2 hover:bg-gray-100"
-                            >
-                                <FiMinus />
-                            </button>
-                            <span className="px-4 py-2 border-x">{quantity}</span>
-                            <button
-                                onClick={handleIncrement}
-                                className="p-2 hover:bg-gray-100"
-                            >
-                                <FiPlus />
-                            </button>
+        <div className='w-full overflow-x-hidden bg-gray-50'>
+            <div className='container mx-auto px-2 sm:px-6 py-6 sm:py-8 lg:py-8'>
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Product Images */}
+                    <div className="flex-1">
+                        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden">
+                            <Image
+                                src={images[selectedImage]}
+                                alt="Product Image"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                            {images.map((image: string, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className={`relative h-16 sm:h-20 md:h-24 rounded-md overflow-hidden cursor-pointer border ${selectedImage === idx ? 'border-orange-500' : 'hover:border-orange-500'}`}
+                                    onClick={() => setSelectedImage(idx)}
+                                >
+                                    <Image
+                                        src={image}
+                                        alt={`Thumbnail ${idx + 1}`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <button
-                            onClick={handleAddToCart}
-                            className="flex items-center justify-center gap-2 w-full bg-orange-500 text-white py-2 sm:py-3 rounded-md hover:bg-orange-600 transition-colors"
-                        >
-                            <FiShoppingCart />
-                            Add to Cart
-                        </button>
+                    {/* Product Info */}
+                    <div className="flex-1 space-y-4 mt-6 md:mt-0">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                            <h1 className="text-2xl sm:text-3xl font-semibold">{name}</h1>
+                            <AddToWishlistButton item={{ id: id as string, name, price, image: images[selectedImage] }} />
+                        </div>
 
-                        <button
-                            onClick={handleBuyNow}
-                            className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-2 sm:py-3 rounded-md hover:bg-green-600 transition-colors"
-                        >
-                            <FiCreditCard />
-                            Buy Now
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <span className="text-xl sm:text-2xl font-bold text-orange-500">৳{price.toLocaleString()}</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h3 className="font-medium">Description:</h3>
+                            <p className="text-gray-600 text-sm sm:text-base">{description}</p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <span className="font-medium">Quantity:</span>
+                            <div className="flex items-center border rounded-md">
+                                <button
+                                    onClick={handleDecrement}
+                                    className="p-2 hover:bg-gray-100"
+                                >
+                                    <FiMinus />
+                                </button>
+                                <span className="px-4 py-2 border-x">{quantity}</span>
+                                <button
+                                    onClick={handleIncrement}
+                                    className="p-2 hover:bg-gray-100"
+                                >
+                                    <FiPlus />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={handleAddToCart}
+                                className="flex items-center justify-center gap-2 w-full bg-orange-500 text-white py-2 sm:py-3 rounded-md hover:bg-orange-600 transition-colors"
+                            >
+                                <FiShoppingCart />
+                                Add to Cart
+                            </button>
+
+                            <button
+                                onClick={handleBuyNow}
+                                className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-2 sm:py-3 rounded-md hover:bg-green-600 transition-colors"
+                            >
+                                <FiCreditCard />
+                                Buy Now
+                            </button>
+                        </div>
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Seller Information</h4>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <FiUser className="w-4 h-4 text-gray-400" />
+                                                <span className="text-gray-700">{product.data.seller?.name || 'Unknown Seller'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FiMail className="w-4 h-4 text-gray-400" />
+                                                <span className="text-gray-700">{product.data.seller?.email || 'Unknown Seller'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaWhatsapp className="w-4 h-4 text-gray-400" />
+                                                <span className="text-gray-700">{product.data.seller?.phoneNumber || 'Unknown Seller'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        onClick={() => setIsEnquiryModalOpen(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                                    >
+                                        <FiMessageSquare className="w-4 h-4" />
+                                        <span>Enquire</span>
+                                    </button>
+                                    <button 
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                                        title="Share Product"
+                                    >
+                                        <FiShare className="w-4 h-4" />
+                                        <span className="hidden sm:inline" onClick={() => {
+                                            if (navigator.share) {
+                                                navigator.share({
+                                                    title: product.data.name,
+                                                    text: product.data.description,
+                                                    url: window.location.href
+                                                })
+                                                .catch(error => console.log('Error sharing:', error));
+                                            } else {
+                                                // Fallback for browsers that don't support Web Share API
+                                                const shareUrl = window.location.href;
+                                                navigator.clipboard.writeText(shareUrl)
+                                                    .then(() => toast.success('Link copied to clipboard!'))
+                                                    .catch(() => toast.error('Failed to copy link'));
+                                            }
+                                        }}>Share</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Enquiry Modal */}
+                            {isEnquiryModalOpen && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-semibold">Send Message to Seller</h3>
+                                            <button 
+                                                onClick={() => setIsEnquiryModalOpen(false)}
+                                                className="text-gray-500 hover:text-gray-700"
+                                            >
+                                                <FiX className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <textarea
+                                                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                                rows={4}
+                                                placeholder="Type your message here..."
+                                                value={enquiryMessage}
+                                                onChange={(e) => setEnquiryMessage(e.target.value)}
+                                            />
+                                            <div className="flex justify-end">
+                                                <button
+                                                    onClick={handleSendEnquiry}
+                                                    className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                                                >
+                                                    Send Message
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 </div>
-            </div>
 
-            {/* Tabs */}
-            <div className="mt-12">
-                <div className="flex flex-wrap border-b">
-                    {['description', 'additional', 'reviews'].map((tab) => (
-                        <button
-                            key={tab}
-                            className={`flex items-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-6 text-sm sm:text-base font-medium transition-colors ${activeTab === tab
-                                ? 'text-orange-500 border-b-2 border-orange-500'
-                                : 'text-gray-500 hover:text-orange-500'
-                                }`}
-                            onClick={() => setActiveTab(tab)}
-                        >
-                            {tab === 'description' && <FiInfo />}
-                            {tab === 'additional' && <FiList />}
-                            {tab === 'reviews' && <FiStar />}
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                        </button>
-                    ))}
-                </div>
-                <div className="mt-6 bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-                    {tabContent[activeTab as keyof typeof tabContent]}
+                {/* Tabs */}
+                <div className="mt-12">
+                    <div className="flex flex-wrap border-b">
+                        {['description', 'additional', 'reviews'].map((tab) => (
+                            <button
+                                key={tab}
+                                className={`flex items-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-6 text-sm sm:text-base font-medium transition-colors ${activeTab === tab
+                                    ? 'text-orange-500 border-b-2 border-orange-500'
+                                    : 'text-gray-500 hover:text-orange-500'
+                                    }`}
+                                onClick={() => setActiveTab(tab)}
+                            >
+                                {tab === 'description' && <FiInfo />}
+                                {tab === 'additional' && <FiList />}
+                                {tab === 'reviews' && <FiStar />}
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mt-6 bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                        {tabContent[activeTab as keyof typeof tabContent]}
+                    </div>
                 </div>
             </div>
         </div>

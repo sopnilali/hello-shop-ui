@@ -4,7 +4,8 @@ import BrandsSection from '@/components/Shared/BrandsSection'
 import HeroSection from '@/components/Shared/HeroSection'
 import React from 'react'
 import BannerAds from './Advertisment/BannerAds'
-import TopProducts from '@/components/HomePage/TopProducts'
+import TrandingMango from '@/components/HomePage/TrandingMango'
+import SeasonOffseason from '@/components/HomePage/SeasonOffseason'
 
 const Homepage = () => {
   return (
@@ -12,7 +13,8 @@ const Homepage = () => {
       <HeroSection />
       <BrandsSection/>
       <BannerAds/>
-      <TopProducts/>
+      <SeasonOffseason/>
+      <TrandingMango/>
       {/* <BestPrice/> */}
       {/* <BrandBaseProducts/> */}
     </div>
