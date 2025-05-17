@@ -1,24 +1,24 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 const BannerAds = () => {
   const banners = [
     {
       id: 1,
-      image: "https://example.com/banner1.jpg", // Replace with actual banner image URL
       title: "Special Mango Offer",
       description: "Get 20% off on all premium mangoes",
-      link: "/offers/mango"
+      link: "/product",
+      backgroundImage: "https://i.pinimg.com/736x/9d/45/1f/9d451fd38e78e0775582d3880feb9a39.jpg"
     },
     {
-      id: 2, 
-      image: "https://example.com/banner2.jpg", // Replace with actual banner image URL
+      id: 2,
       title: "New Season Collection",
       description: "Fresh fruits straight from the garden",
-      link: "/new-arrivals"
+      link: "/product",
+      backgroundImage: "https://png.pngtree.com/background/20210711/original/pngtree-green-delicious-fruit-food-mango-banner-picture-image_1082988.jpg"
     }
   ];
 
@@ -31,31 +31,29 @@ const BannerAds = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer"
+            whileHover={{ scale: 0.98 }}
+            className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer h-[200px]"
+            style={{
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${banner.backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
           >
-            <div className="relative h-[200px] w-full">
-              <Image
-                src={banner.image}
-                alt={banner.title}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center px-6">
-                <h3 className="text-white text-2xl font-bold mb-2">
-                  {banner.title}
-                </h3>
-                <p className="text-white text-sm mb-4">
-                  {banner.description}
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-[#ff4500] text-white px-6 py-2 rounded-full w-fit"
+            <div className="h-full flex flex-col justify-center px-6">
+              <h3 className="text-white text-2xl font-bold mb-2">
+                {banner.title}
+              </h3>
+              <p className="text-white text-sm mb-4">
+                {banner.description}
+              </p>
+              <Link href={banner.link}>
+                <button
+                  className="bg-orange-600 text-white px-6 py-2 rounded-full w-fit font-semibold hover:bg-orange-800 transition-colors duration-500"
                 >
                   Shop Now
-                </motion.button>
-              </div>
+                </button>
+              </Link>
             </div>
           </motion.div>
         ))}

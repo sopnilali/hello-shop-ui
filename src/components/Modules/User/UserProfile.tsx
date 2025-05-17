@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/components/Redux/hooks';
 import { useGetUserQuery, useUpdateUserMutation } from '@/components/Redux/features/user/useApi';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiShoppingBag, FiHeart, FiCreditCard, FiLogOut } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiShoppingBag, FiHeart, FiCreditCard, FiLogOut, FiLoader } from 'react-icons/fi';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { deleteCookie } from 'cookies-next';
@@ -22,12 +22,14 @@ const UserProfile = () => {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('profile');
     const [isEditing, setIsEditing] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string>("");
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const user = useAppSelector((state) => state.auth.user) as User | null;
     const { data: userData, refetch } = useGetUserQuery(user?.id as string);
     const [updateUser] = useUpdateUserMutation();
-    const { data: orderHistory } = useGetorderHistoryQuery(undefined);
-
-    console.log(orderHistory);
+    const { data: orderHistory } = useGetorderHistoryQuery({});
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -35,7 +37,6 @@ const UserProfile = () => {
         phoneNumber: '',
         address: '',
         city: '',
-        shippingAddress: ''
     });
 
     useEffect(() => {
@@ -46,7 +47,6 @@ const UserProfile = () => {
                 phoneNumber: userData.data.phoneNumber || '',
                 address: userData.data.address || '',
                 city: userData.data.city || '',
-                shippingAddress: userData.data.shippingAddress || ''
             });
         }
     }, [userData]);
@@ -59,18 +59,42 @@ const UserProfile = () => {
         }));
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsUpdating(true);
         try {
+            const formDataToSend = new FormData();
+            formDataToSend.append('data', JSON.stringify(formData));
+            
+            if (imageFile) {
+                formDataToSend.append('file', imageFile);
+            }
+            
             await updateUser({
-                id: user?.id,
-                userData: formData
+                userId: user?.id,
+                formData: formDataToSend
             }).unwrap();
             toast.success('Profile updated successfully');
             setIsEditing(false);
+            setImageFile(null);
+            setPreviewImage("");
             refetch();
         } catch (error: any) {
             toast.error(error?.data?.message || 'Failed to update profile');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -93,8 +117,39 @@ const UserProfile = () => {
                         {/* Sidebar */}
                         <div className="bg-gray-50 p-6 ">
                             <div className="text-center mb-6">
-                                <div className="w-24 h-24 bg-orange-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                                    <FiUser className="w-12 h-12 text-orange-500" />
+                                <div className="relative w-24 h-24 mx-auto mb-4">
+                                    {isEditing ? (
+                                        <>
+                                            <div className="w-24 h-24 rounded-full overflow-hidden">
+                                                <img 
+                                                    src={previewImage || userData?.data?.profilePhoto || '/default-avatar.png'} 
+                                                    alt="Profile" 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleImageUpload}
+                                                accept="image/*"
+                                                className="hidden"
+                                            />
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="absolute bottom-0 right-0 bg-orange-500 text-white p-1 rounded-full hover:bg-orange-600 transition-colors"
+                                            >
+                                                <FiEdit2 className="w-4 h-4" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div className="w-24 h-24 rounded-full overflow-hidden">
+                                            <img 
+                                                src={userData?.data?.profilePhoto || '/default-avatar.png'} 
+                                                alt="Profile" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                                 <h2 className="text-xl font-semibold">{userData?.data?.name}</h2>
                                 <p className="text-gray-500">{userData?.data?.email}</p>
@@ -205,17 +260,6 @@ const UserProfile = () => {
                                                     name="address"
                                                     value={formData.address}
                                                     onChange={handleInputChange}
-                                                    placeholder="Full Address"
-                                                    rows={3}
-                                                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <textarea
-                                                    name="shippingAddress"
-                                                    value={formData.shippingAddress}
-                                                    onChange={handleInputChange}
                                                     placeholder="Shipping Address"
                                                     rows={3}
                                                     className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -225,16 +269,25 @@ const UserProfile = () => {
                                             <div className="flex justify-end gap-4">
                                                 <button
                                                     type="button"
+                                                    disabled={isUpdating}
                                                     onClick={() => setIsEditing(false)}
-                                                    className="px-6 py-2 border rounded-md hover:bg-gray-50"
+                                                    className="px-6 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50"
                                                 >
                                                     Cancel
                                                 </button>
                                                 <button
                                                     type="submit"
-                                                    className="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600"
+                                                    disabled={isUpdating}
+                                                    className="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
                                                 >
-                                                    Save Changes
+                                                    {isUpdating ? (
+                                                        <>
+                                                            <FiLoader className="w-4 h-4 animate-spin" />
+                                                            Updating...
+                                                        </>
+                                                    ) : (
+                                                        'Save Changes'
+                                                    )}
                                                 </button>
                                             </div>
                                         </form>
@@ -275,13 +328,8 @@ const UserProfile = () => {
                                             </div>
 
                                             <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm text-gray-500 mb-2">Full Address</p>
-                                                <p className="font-medium">{userData?.data?.address || 'Not provided'}</p>
-                                            </div>
-
-                                            <div className="p-4 bg-gray-50 rounded-lg">
                                                 <p className="text-sm text-gray-500 mb-2">Shipping Address</p>
-                                                <p className="font-medium">{userData?.data?.shippingAddress || 'Not provided'}</p>
+                                                <p className="font-medium">{userData?.data?.address || 'Not provided'}</p>
                                             </div>
                                         </div>
                                     )}

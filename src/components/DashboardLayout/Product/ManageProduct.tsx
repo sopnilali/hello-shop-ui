@@ -255,7 +255,7 @@ const ManageProduct = () => {
                 className="p-8 max-h-[90vh] overflow-y-auto"
                 encType="multipart/form-data"
               >
-                <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold mb-6 bg-white bg-clip-text text-transparent">
                   Add New Product
                 </h2>
 

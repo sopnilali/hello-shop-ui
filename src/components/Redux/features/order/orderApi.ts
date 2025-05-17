@@ -13,11 +13,22 @@ const orderApi = baseApi.injectEndpoints({
             invalidatesTags: ["order"]
         }),
         getAllOrder: builder.query({
-            query: () => ({
-                url: '/order/',
-                method: "GET",
-            }),
-            providesTags: ["order"]
+            query: (args) => {
+                const params = new URLSearchParams();
+
+                if (args) {
+                    args?.forEach((item: any) => {
+                        params?.append(item?.name, item?.value as string);
+                    });
+                }
+
+                return {
+                    url: "/order",
+                    method: "GET",
+                    params: params,
+                };
+            },
+            providesTags: ["order"],
         }),
         getOrderById: builder.query({
             query: (id) => ({
@@ -33,15 +44,15 @@ const orderApi = baseApi.injectEndpoints({
             }),
             providesTags: ["order"]
         }),
-        updateOrder: builder.mutation({
-            query: ({ id, orderData }) => ({
-                url: `/order/${id}`,
-                method: "PUT",
-                body: orderData,
+        updateOrderStatus : builder.mutation({
+            query: ({ id, statusData }) => ({
+                url: `/order/${id}/status`,
+                method: "PATCH",
+                body: statusData,
             }),
             invalidatesTags: ["order"]
         })
     })  
 })
 
-export const { useCreateOrderMutation, useGetAllOrderQuery, useGetOrderByIdQuery, useUpdateOrderMutation, useGetorderHistoryQuery } = orderApi;
+export const { useCreateOrderMutation, useGetAllOrderQuery, useGetOrderByIdQuery, useUpdateOrderStatusMutation, useGetorderHistoryQuery } = orderApi;

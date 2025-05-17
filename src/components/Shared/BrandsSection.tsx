@@ -31,7 +31,7 @@ const BrandsSection = () => {
       <h2
         className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8"
       >
-        Our Brands
+        Sub Category
       </h2>
       <div className="flex flex-nowrap sm:flex-wrap justify-start sm:justify-center items-center gap-6 sm:gap-8 md:gap-12 w-full max-w-5xl overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin snap-x snap-mandatory">
         {brands?.data?.map((brand: any, idx: any) => (

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { MdCategory, MdDiscount, MdMovie, MdPerson, MdRateReview, MdSpaceDashboard } from "react-icons/md";
 import { FaUsers } from "react-icons/fa";
 import { useAppSelector } from "@/components/Redux/hooks";
+import { RiOrderPlayFill } from "react-icons/ri";
 
 interface User {
   id: string;
@@ -25,8 +26,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { name: "Overview", icon: <MdSpaceDashboard />, link: "/dashboard" },
     { name: "Products", icon: <MdMovie />, link: "/dashboard/products" },
-    { name: "Brand & Category", icon: <MdRateReview />, link: "/dashboard/brand-category" },
-    { name: "Discount", icon: <MdDiscount />, link: "/dashboard/discount" },
+    { name: "Sub & Category", icon: <MdRateReview />, link: "/dashboard/brand-category" },
+    { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" },
   ];
 
   // Add Users route only for ADMIN role

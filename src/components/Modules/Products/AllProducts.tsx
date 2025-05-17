@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Rating } from '@smastrom/react-rating'
+import '@smastrom/react-rating/style.css'
 
 
 const AllProducts: React.FC = () => {
@@ -237,7 +238,7 @@ const AllProducts: React.FC = () => {
         </div>
       </div>
       <div className='mb-6'>
-        <h3 className='font-semibold mb-2 text-gray-700'>Brand</h3>
+        <h3 className='font-semibold mb-2 text-gray-700'>Sub Category</h3>
         <div className='flex flex-col gap-2'>
           {brands?.data?.map((brand: any) => {
             const checked = selectedBrands.includes(brand.id)
@@ -498,14 +499,7 @@ const AllProducts: React.FC = () => {
                         >
                           {product.name}
                         </Link>
-                        <div className="flex items-center gap-1 mb-2">
-                          <Rating
-                            style={{ maxWidth: 80 }}
-                            value={product.averageRating}
-                            readOnly
-                          />
-                          <span className="text-sm text-gray-600">({product.averageRating})</span>
-                        </div>
+
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                           <p className="text-lg font-bold text-orange-600">৳{product.price.toFixed(2)}</p>
                           <button

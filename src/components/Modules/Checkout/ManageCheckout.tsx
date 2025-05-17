@@ -51,11 +51,12 @@ const ManageCheckout = () => {
 
     useEffect(() => {
         refetch();
-
         if (UserData?.data) {
             setFormData(prev => ({
                 ...prev,
-                phoneNumber: UserData.data.phoneNumber || ''
+                phoneNumber: UserData.data.phoneNumber || '',
+                address: UserData.data.address || '',
+                city: UserData.data.city || ''
             }));
         }
 
@@ -73,9 +74,6 @@ const ManageCheckout = () => {
         }
     }, [refetch, UserData, cartShippingInfo, formData.city, total]);
 
-    useEffect(() => {
-        console.log("Cart Items:", cartItems);
-    }, [cartItems]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -210,7 +208,7 @@ const ManageCheckout = () => {
                             <div className="mt-4">
                                 <textarea
                                     name="address"
-                                    placeholder="Full Address"
+                                    placeholder="Shipping Address"
                                     value={formData.address}
                                     onChange={handleInputChange}
                                     required
@@ -240,9 +238,9 @@ const ManageCheckout = () => {
                                     <ol className="list-decimal list-inside">
                                         <li>Open your {formData.paymentMethod} app</li>
                                         <li>Go to "Send Money"</li>
-                                        <li>Enter this number: {formData.paymentMethod === 'bkash' ? '01XXXXXXXXX' : '01YYYYYYYYY'}</li>
+                                        <li>Enter this number: {formData.paymentMethod === 'bkash' ? '01737055870' : '01YYYYYYYYY'}</li>
                                         <li>Enter the amount: ৳{finalTotal.toLocaleString()}</li>
-                                        <li>Use reference: {user?.id}</li>
+                                        <li>Use reference: 1</li>
                                         <li>Complete the transaction</li>
                                         <li>Enter the Transaction ID below</li>
                                     </ol>

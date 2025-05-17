@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto, Roboto_Mono } from "next/font/google";
+import { Noto_Serif_Bengali, Roboto } from "next/font/google";
 import "./globals.css";
 import ProvidersWrapper from "@/components/Providers/ProvidersWrapper";
 
-const robotoSans = Roboto({
-  variable: "--font-roboto-sans",
-  subsets: ["latin"],
+const notoSerifBengali = Noto_Serif_Bengali({
+  weight: ['400', '500', '600', '700'],
+  subsets: ["bengali"],
+  variable: "--font-noto-serif-bengali",
+  display: 'swap',
 });
 
-const robotoMono = Roboto_Mono({
-  variable: "--font-roboto-mono",
+const roboto = Roboto({
+  weight: ['400', '500', '700'],
   subsets: ["latin"],
+  variable: "--font-roboto",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${robotoSans.variable} ${robotoMono.variable} antialiased`}
-      >
+      <body className={`${notoSerifBengali.variable} ${roboto.variable} font-roboto `}>
         <ProvidersWrapper>
           {children}
         </ProvidersWrapper>

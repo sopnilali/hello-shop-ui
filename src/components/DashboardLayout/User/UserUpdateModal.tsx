@@ -11,6 +11,7 @@ interface User {
   phoneNumber: string;
   profilePhoto: string;
   address: string;
+  city: string;
   role: string;
   status: string;
 }
@@ -58,6 +59,7 @@ const UserUpdateModal = ({
       name: data.name,
       phoneNumber: data.phoneNumber,
       address: data.address,
+      city: data.city,
       role: data.role,
       status: data.status
     };
@@ -205,6 +207,28 @@ const UserUpdateModal = ({
                       <option value="BLOCKED">BLOCKED</option>
                     </select>
                   </div>
+                <div>
+                  <label htmlFor="city" className="block mb-2 text-gray-300">City</label>
+                  <select
+                    id="city"
+                    {...register("city", { required: true })}
+                    className="w-full bg-gray-800 px-4 py-2 rounded-lg focus:ring-2 focus:ring-gray-500 text-white"
+                  >
+                    <option value="">Select City</option>
+                    <option value="Dhaka">Dhaka</option>
+                    <option value="Chittagong">Chittagong</option>
+                    <option value="Rajshahi">Rajshahi</option>
+                    <option value="Chapainawabganj">Chapainawabganj</option>
+                    <option value="Khulna">Khulna</option>
+                    <option value="Barishal">Barishal</option>
+                    <option value="Sylhet">Sylhet</option>
+                    <option value="Rangpur">Rangpur</option>
+                    <option value="Mymensingh">Mymensingh</option>
+                  </select>
+                  {errors.city && (
+                    <p className="text-red-500">City is required!</p>
+                  )}
+                </div>
                 </div>
               </div>
 

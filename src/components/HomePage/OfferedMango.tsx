@@ -4,8 +4,8 @@ import React from 'react'
 import { useAllProductsQuery } from '../Redux/features/products/productsApi'
 import { ProductCard } from '../Modules/Products/ProductCard'
 
-const TrandingMango = () => {
-  const { data: Allproducts, isLoading } = useAllProductsQuery({ sortBy: 'rating', sortOrder: 'desc' })
+const OfferedMango = () => {
+  const { data: Allproducts, isLoading } = useAllProductsQuery({ sortBy: 'price', sortOrder: 'asc' })
 
   // 5 cards per row
   const gridClass = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
@@ -15,7 +15,7 @@ const TrandingMango = () => {
 
   return (
     <div className="container mx-auto px-1 lg:px-0 py-6">
-      <h2 className="text-2xl font-bold mb-6">Most Popular</h2>
+      <h2 className="text-2xl font-bold mb-6">Best Offers</h2>
       <div className={gridClass}>
         {isLoading
           ? loadingSkeletons.map((_, idx) => <ProductCard key={idx} loading />)
@@ -30,4 +30,4 @@ const TrandingMango = () => {
   )
 }
 
-export default TrandingMango
+export default OfferedMango
