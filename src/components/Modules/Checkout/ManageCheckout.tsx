@@ -55,8 +55,6 @@ const ManageCheckout = () => {
             setFormData(prev => ({
                 ...prev,
                 phoneNumber: UserData.data.phoneNumber || '',
-                address: UserData.data.address || '',
-                city: UserData.data.city || ''
             }));
         }
 

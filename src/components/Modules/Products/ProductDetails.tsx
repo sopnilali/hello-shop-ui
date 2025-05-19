@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FiMinus, FiPlus, FiShoppingCart, FiCreditCard, FiInfo, FiList, FiStar, FiShare, FiMessageSquare, FiX, FiUser, FiMail, FiPhone } from 'react-icons/fi';
+import { FiMinus, FiPlus, FiShoppingCart, FiCreditCard, FiInfo, FiList, FiStar, FiShare, FiMessageSquare, FiX, FiUser, FiMail, FiPhone, FiRepeat } from 'react-icons/fi';
 import { useParams, useRouter } from 'next/navigation';
 import { useSingleProductQuery } from '@/components/Redux/features/products/productsApi';
 import { useAppDispatch, useAppSelector } from '@/components/Redux/hooks';
@@ -16,6 +16,7 @@ import ReviewCard from '../Reviews/ReviewCard';
 import { useForm } from 'react-hook-form';
 import { useCreateReviewMutation } from '@/components/Redux/features/review/reviewApi';
 import { FaWhatsapp } from 'react-icons/fa';
+import { BiSolidData } from 'react-icons/bi';
 
 interface ReviewFormData {
     rating: number;
@@ -123,7 +124,9 @@ const ProductDetails = () => {
     if (isError) return <div>Error loading product details</div>;
     if (!product || !product.data) return <div>No product data available</div>;
 
-    const { images, name, price, description, weight, dimensions, origin, brand, category } = product.data;
+    const { images, name, price, description, weight, dimensions, origin, brand, category, orderItems } = product.data;
+
+    const totalQuantity = orderItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
     const handleIncrement = () => {
         setQuantity(prev => prev + 1);
@@ -393,6 +396,9 @@ const ProductDetails = () => {
                                 </button>
                             </div>
                         </div>
+                        <div className="flex items-center gap-4">
+                            <span className="text-gray-600 text-sm sm:text-base flex items-center gap-2"><BiSolidData/> {totalQuantity} Items Sold</span>
+                        </div>
 
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
@@ -411,92 +417,92 @@ const ProductDetails = () => {
                                 Buy Now
                             </button>
                         </div>
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col space-y-2">
-                                        <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Seller Information</h4>
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <FiUser className="w-4 h-4 text-gray-400" />
-                                                <span className="text-gray-700">{product.data.seller?.name || 'Unknown Seller'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <FiMail className="w-4 h-4 text-gray-400" />
-                                                <span className="text-gray-700">{product.data.seller?.email || 'Unknown Seller'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <FaWhatsapp className="w-4 h-4 text-gray-400" />
-                                                <span className="text-gray-700">{product.data.seller?.phoneNumber || 'Unknown Seller'}</span>
-                                            </div>
+                        <div className="flex flex-col lg:flex-row sm:flex-row  lg:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col space-y-2">
+                                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Seller Information</h4>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <FiUser className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-700">{product.data.seller?.name || 'Unknown Seller'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <FiMail className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-700">{product.data.seller?.email || 'Unknown Seller'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <FaWhatsapp className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-700">{product.data.seller?.phoneNumber || 'Unknown Seller'}</span>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button 
-                                        onClick={() => setIsEnquiryModalOpen(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
-                                    >
-                                        <FiMessageSquare className="w-4 h-4" />
-                                        <span>Enquire</span>
-                                    </button>
-                                    <button 
-                                        className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                                        title="Share Product"
-                                    >
-                                        <FiShare className="w-4 h-4" />
-                                        <span className="hidden sm:inline" onClick={() => {
-                                            if (navigator.share) {
-                                                navigator.share({
-                                                    title: product.data.name,
-                                                    text: product.data.description,
-                                                    url: window.location.href
-                                                })
-                                                .catch(error => console.log('Error sharing:', error));
-                                            } else {
-                                                // Fallback for browsers that don't support Web Share API
-                                                const shareUrl = window.location.href;
-                                                navigator.clipboard.writeText(shareUrl)
-                                                    .then(() => toast.success('Link copied to clipboard!'))
-                                                    .catch(() => toast.error('Failed to copy link'));
-                                            }
-                                        }}>Share</span>
-                                    </button>
                                 </div>
                             </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setIsEnquiryModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                                >
+                                    <FiMessageSquare className="w-4 h-4" />
+                                    <span>Enquire</span>
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                                    title="Share Product"
+                                >
+                                    <FiShare className="w-4 h-4" />
+                                    <span className=" sm:inline" onClick={() => {
+                                        if (navigator.share) {
+                                            navigator.share({
+                                                title: product.data.name,
+                                                text: product.data.description,
+                                                url: window.location.href
+                                            })
+                                                .catch(error => console.log('Error sharing:', error));
+                                        } else {
+                                            // Fallback for browsers that don't support Web Share API
+                                            const shareUrl = window.location.href;
+                                            navigator.clipboard.writeText(shareUrl)
+                                                .then(() => toast.success('Link copied to clipboard!'))
+                                                .catch(() => toast.error('Failed to copy link'));
+                                        }
+                                    }}>Share</span>
+                                </button>
+                            </div>
+                        </div>
 
-                            {/* Enquiry Modal */}
-                            {isEnquiryModalOpen && (
-                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-lg font-semibold">Send Message to Seller</h3>
-                                            <button 
-                                                onClick={() => setIsEnquiryModalOpen(false)}
-                                                className="text-gray-500 hover:text-gray-700"
+                        {/* Enquiry Modal */}
+                        {isEnquiryModalOpen && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-semibold">Send Message to Seller</h3>
+                                        <button
+                                            onClick={() => setIsEnquiryModalOpen(false)}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            <FiX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <textarea
+                                            className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            rows={4}
+                                            placeholder="Type your message here..."
+                                            value={enquiryMessage}
+                                            onChange={(e) => setEnquiryMessage(e.target.value)}
+                                        />
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={handleSendEnquiry}
+                                                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
                                             >
-                                                <FiX className="w-5 h-5" />
+                                                Send Message
                                             </button>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <textarea
-                                                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                                rows={4}
-                                                placeholder="Type your message here..."
-                                                value={enquiryMessage}
-                                                onChange={(e) => setEnquiryMessage(e.target.value)}
-                                            />
-                                            <div className="flex justify-end">
-                                                <button
-                                                    onClick={handleSendEnquiry}
-                                                    className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
-                                                >
-                                                    Send Message
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
