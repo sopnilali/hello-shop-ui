@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { MdDeleteOutline } from "react-icons/md";
 import { FaPen } from "react-icons/fa6";
-import { useGetAllOrderQuery, useUpdateOrderStatusMutation } from "@/components/Redux/features/order/orderApi";
+import { useDeleteOrderMutation, useGetAllOrderQuery, useUpdateOrderStatusMutation } from "@/components/Redux/features/order/orderApi";
 import OrderStatusUpdateModal from "./OrderStatusUpdateModal";
 
 enum OrderStatus {
@@ -29,8 +29,8 @@ const ManageOrder = () => {
       { name: 'page', value: currentPage }
     ]
   );
+  const [deleteOrder] = useDeleteOrderMutation();
 
-  const [updateOrderStatus] = useUpdateOrderStatusMutation();
 
   const allOrders = orders?.data?.data;
   const totalItems = orders?.data?.meta?.total || 0;
@@ -53,9 +53,14 @@ const ManageOrder = () => {
       setIsLoading(true);
       const toastId = toast.loading("Deleting Order...");
       try {
-        // Add delete order mutation here
-        toast.success("Order deleted successfully!", { id: toastId });
-        refetch();
+        const res = await deleteOrder(orderToDelete);
+        if(res.error){
+          toast.error("Failed to delete order. Please try again.", { id: toastId });
+        }
+        if(res.data.success){
+          toast.success("Order deleted successfully!", { id: toastId });
+          refetch();
+        }
       } catch (error) {
         console.error("Error deleting order:", error);
         toast.error("Failed to delete order. Please try again.", { id: toastId });
@@ -151,6 +156,13 @@ const ManageOrder = () => {
                 ))}
               </tbody>
             </table>
+            {allOrders && allOrders.length > 0 ? (
+              ""
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                No orders found
+              </div>
+            )}
           </div>
         </div>
 

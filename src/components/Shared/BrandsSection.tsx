@@ -33,7 +33,7 @@ const BrandsSection = () => {
       >
         Sub Category
       </h2>
-      <div className="flex flex-nowrap sm:flex-wrap justify-start sm:justify-center items-center gap-6 sm:gap-8 md:gap-12 w-full max-w-5xl overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin snap-x snap-mandatory">
+      <div className="flex flex-nowrap sm:flex-wrap justify-start sm:justify-center items-center gap-6 sm:gap-8 md:gap-12 w-full max-w-5xl overflow-x-auto pb-2 -mx-2 px-2  ">
         {brands?.data?.map((brand: any, idx: any) => (
           <motion.div
             key={idx}
@@ -44,11 +44,10 @@ const BrandsSection = () => {
             className="flex flex-col items-center min-w-full sm:min-w-0 sm:w-auto snap-center"
           >
             <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.5 }}
-              className="w-24 h-24 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center mb-1 sm:mb-2"
+  
+              className=" flex items-center justify-center mb-1 sm:mb-2 rounded-[300%] overflow-hidden"
             >
-              <Image src={brand.logo} alt={brand.name} width={80} height={80} className="object-contain w-full h-full" />
+              <Image src={brand.logo} alt={brand.name} width={80} height={80} className="object-contain w-full h-full rounded-[300%]" />
             </motion.div>
             <Link href={`/product?brandId=${brand.id}`}>
             <motion.span

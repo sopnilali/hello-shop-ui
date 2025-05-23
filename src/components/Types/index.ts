@@ -10,6 +10,7 @@ export interface Product {
     condition: string;
     brandId: string;
     status: string;
+    shopId: string;
     sellerId: string;
     createdAt: string;
     updatedAt: string;

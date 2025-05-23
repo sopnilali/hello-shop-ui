@@ -4,7 +4,7 @@ import React from 'react'
 const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     return (
       <div>
-        <DashboardLayout children={children} />
+            <DashboardLayout children={children} />
       </div>
     );
   };

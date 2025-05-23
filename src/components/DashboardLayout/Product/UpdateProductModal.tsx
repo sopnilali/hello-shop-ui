@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { useUpdateProductMutation } from "@/components/Redux/features/products/productsApi";
 import { Product } from "@/components/Types";
+import { useAllShopQuery } from "@/components/Redux/features/shop/shopApi";
 
 interface UpdateProductModalProps {
   isOpen: boolean;
@@ -33,6 +34,8 @@ const UpdateProductModal = ({
   const [images, setImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const { data: shopData } = useAllShopQuery(undefined);
+  const [shops, setShops] = useState([]);
 
   const handleImageUpload = (files: FileList | null) => {
     if (files) {
@@ -100,14 +103,14 @@ const UpdateProductModal = ({
       brandId: data.brandId,
       quantity: data.quantity,
       condition: data.condition,
+      shopId: data.shopId,
       status: data.status
     };
-    console.log(productData)
 
     formData.append("data", JSON.stringify(productData));
     
     const response = await updateProduct({formData, productId: data.id});
-    console.log(response)
+
 
     if(response.error){
       toast.error("Failed to update product", { id: toastId });
@@ -123,6 +126,13 @@ const UpdateProductModal = ({
   };
 
   useEffect(() => {
+    if (shopData) {
+      setShops(shopData.data);
+    }
+  }, [shopData]);
+
+  useEffect(() => {
+
     if (product) {
       reset(product);
       setPreviewImages(product.images);
@@ -259,6 +269,22 @@ const UpdateProductModal = ({
                       ))}
                     </select>
                   </div>
+                  <div>
+                    <label htmlFor="shopId" className="block mb-2 text-gray-300">Shop</label>
+                    <select
+                      id="shopId"
+                      {...register("shopId")}
+                      className="w-full bg-gray-800 px-4 py-2 rounded-lg focus:ring-2 focus:gray-blue-500 text-white"
+                    >
+                      <option value="">Select Shop</option>
+                      {shops.map((shop: any) => (
+                        <option key={shop.id} value={shop.id}>
+                          {shop.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                 </div>
 
                 {/* Right Column */}

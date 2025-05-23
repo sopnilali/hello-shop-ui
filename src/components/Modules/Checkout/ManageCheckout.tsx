@@ -6,12 +6,13 @@ import { clearCart } from '@/components/Redux/features/cart/cartSlice';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { FiMapPin, FiPhone, FiMail, FiUser } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiUser, FiTag } from 'react-icons/fi';
 import { calculateShippingCost } from '@/components/Utils/shippingCost';
 import { useGetUserQuery } from '@/components/Redux/features/user/useApi';
 import { useCreateOrderMutation } from '@/components/Redux/features/order/orderApi';
 import { getCookie } from 'cookies-next';
 import { verifyToken } from '@/components/Utils/verifyToken';
+import { useVerifyCouponMutation } from '@/components/Redux/features/coupon/couponApi';
 
 const ManageCheckout = () => {
     const router = useRouter();
@@ -26,6 +27,17 @@ const ManageCheckout = () => {
 
     const { data: UserData, refetch } = useGetUserQuery(user?.id as string);
     const [createOrder] = useCreateOrderMutation();
+    const [verifyCoupon] = useVerifyCouponMutation();
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<{
+        code: string;
+        type: string;
+        value: number;
+        minPurchase: number;
+        maxDiscount: number;
+    } | null>(null);
+    const [isVerifyingCoupon, setIsVerifyingCoupon] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
@@ -34,7 +46,8 @@ const ManageCheckout = () => {
         address: '',
         transactionId: '',
         city: cartShippingInfo?.city || '',
-        paymentMethod: 'CASH_ON_DELIVERY'
+        paymentMethod: 'CASH_ON_DELIVERY',
+        couponCode: ''
     });
 
     const [shippingInfo, setShippingInfo] = useState({
@@ -47,7 +60,62 @@ const ManageCheckout = () => {
         const quantity = typeof item.quantity === 'number' && !isNaN(item.quantity) ? item.quantity : 1; // Default quantity set to 1
         return sum + (price * quantity);
     }, 0);
-    const finalTotal = total + shippingInfo.cost;
+
+    const handleCouponApply = async () => {
+        if (!couponCode.trim()) {
+            toast.error('Please enter a coupon code');
+            return;
+        }
+
+        setIsVerifyingCoupon(true);
+        try {
+            const response = await verifyCoupon({
+                code: couponCode,
+                totalAmount: total
+            }).unwrap();
+            
+            if (response?.data?.coupon) {
+                setAppliedCoupon({
+                    code: response.data.coupon.code,
+                    type: response.data.coupon.type,
+                    value: response.data.coupon.value,
+                    minPurchase: response.data.coupon.minPurchase,
+                    maxDiscount: response.data.coupon.maxDiscount
+                });
+                setFormData(prev => ({
+                    ...prev,
+                    couponCode: couponCode
+                }));
+                toast.success('Coupon applied successfully!');
+            } else {
+                toast.error(response?.message || 'Invalid coupon code');
+            }
+        } catch (error: any) {
+            toast.error(error?.message || 'Invalid coupon code');
+        } finally {
+            setIsVerifyingCoupon(false);
+        }
+    };
+
+    const calculateDiscount = () => {
+        if (!appliedCoupon) return 0;
+        
+        let discountAmount = 0;
+        if (appliedCoupon.type === 'PERCENTAGE') {
+            discountAmount = (total * appliedCoupon.value) / 100;
+            if (appliedCoupon.maxDiscount) {
+                discountAmount = Math.min(discountAmount, appliedCoupon.maxDiscount);
+            }
+        } else if (appliedCoupon.type === 'FIXED') {
+            discountAmount = appliedCoupon.value;
+        }
+        
+        return Math.round(discountAmount);
+    };
+
+    const discount = calculateDiscount();
+    const subtotal = total - discount;
+    const finalTotal = subtotal + shippingInfo.cost;
 
     useEffect(() => {
         refetch();
@@ -86,8 +154,33 @@ const ManageCheckout = () => {
         }
     };
 
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponCode('');
+        setFormData(prev => ({
+            ...prev,
+            couponCode: ''
+        }));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate required fields
+        if (!formData.address || !formData.phoneNumber || !formData.city) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        // Validate payment method specific fields
+        if ((formData.paymentMethod === 'BKASH' || formData.paymentMethod === 'NAGAD' || formData.paymentMethod === 'bank') && !formData.transactionId) {
+            toast.error('Please enter the transaction ID');
+            return;
+        }
+
+        setIsSubmitting(true);
+        const toastId = toast.loading('Processing your order...');
+
         const orderData = {
             address: formData.address,
             phoneNumber: formData.phoneNumber,
@@ -95,21 +188,31 @@ const ManageCheckout = () => {
             city: formData.city,
             items: cartItems.map(item => ({
                 productId: item.id,
-                quantity: item.quantity || 1 // Default quantity set to 1 if not specified
+                quantity: item.quantity || 1
             })),
             total: finalTotal,
             transactionId: formData.transactionId,
-            userId: user?.id
+            userId: user?.id,
+            couponCode: formData.couponCode
         };
 
         try {
             const response = await createOrder(orderData).unwrap();
-            toast.success('Order placed successfully!');
-            dispatch(clearCart());
-            router.push(`/order-success/${response?.data?.id}`);
+            
+            if (formData.paymentMethod === 'SSL_COMMERZ') {
+                toast.success('Redirecting to payment gateway...', { id: toastId });
+                window.location.href = response?.data?.paymentUrl;
+                dispatch(clearCart());
+            } else {
+                toast.success('Order placed successfully!', { id: toastId });
+                dispatch(clearCart());
+                router.push(`/order-success?tran_id=${response?.data?.order?.transactionId}`);
+            }
         } catch (error: any) {
             console.error('Failed to create order:', error);
-            toast.error(error?.data?.message || 'Failed to place order. Please try again.');
+            toast.error(error?.data?.message || 'Failed to place order. Please try again.', { id: toastId });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -225,18 +328,18 @@ const ManageCheckout = () => {
                                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                             >
                                 <option value="cash">Cash on Delivery</option>
-                                <option value="card">Credit/Debit Card</option>
-                                <option value="bkash">bKash</option>
-                                <option value="nagad">Nagad</option>
+                                <option value="SSL_COMMERZ">SSLCOMMERZ</option>
+                                <option value="BKASH">bKash</option>
+                                <option value="NAGAD">Nagad</option>
                                 <option value="bank">Bank Transfer</option>
                             </select>
-                            {(formData.paymentMethod === 'bkash' || formData.paymentMethod === 'nagad') && (
+                            {(formData.paymentMethod === 'BKASH' || formData.paymentMethod === 'NAGAD') && (
                                 <div className="mt-4 p-4 bg-gray-100 rounded-md">
                                     <h3 className="font-semibold mb-2">Payment Instructions:</h3>
                                     <ol className="list-decimal list-inside">
                                         <li>Open your {formData.paymentMethod} app</li>
                                         <li>Go to "Send Money"</li>
-                                        <li>Enter this number: {formData.paymentMethod === 'bkash' ? '01737055870' : '01YYYYYYYYY'}</li>
+                                        <li>Enter this number: {formData.paymentMethod === 'BKASH' ? '01737055870' : '01YYYYYYYYY'}</li>
                                         <li>Enter the amount: ৳{finalTotal.toLocaleString()}</li>
                                         <li>Use reference: 1</li>
                                         <li>Complete the transaction</li>
@@ -249,7 +352,7 @@ const ManageCheckout = () => {
                                         value={formData.transactionId}
                                         onChange={handleInputChange}
                                         className="w-full mt-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                        required={formData.paymentMethod === 'bkash' || formData.paymentMethod === 'nagad'}
+                                        required={formData.paymentMethod === 'BKASH' || formData.paymentMethod === 'NAGAD'}
                                     />
                                 </div>
                             )}
@@ -276,14 +379,19 @@ const ManageCheckout = () => {
                                     />
                                 </div>
                             )}
+                            {formData.paymentMethod === 'SSL_COMMERZ' && (
+                                <div className="mt-4 p-4 bg-blue-100 rounded-md">
+                                    <h3 className="font-semibold mb-2">SSLCOMMERZ Payment Gateway</h3>
+                                    <p>
+                                        You will be redirected to the SSLCOMMERZ secure payment gateway after placing your order to complete the payment.
+                                    </p>
+                                    <ul className="list-disc list-inside mt-2 text-sm text-gray-700">
+                                        <li>Supports Visa, MasterCard, bKash, Nagad, Rocket, and more.</li>
+                                        <li>Make sure to complete the payment to confirm your order.</li>
+                                    </ul>
+                                </div>
+                            )}
                         </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-orange-500 text-white py-3 rounded-md hover:bg-orange-600 transition-colors"
-                        >
-                            Place Order
-                        </button>
                     </form>
                 </div>
 
@@ -292,63 +400,99 @@ const ManageCheckout = () => {
                     <div className="bg-white p-6 rounded-lg shadow-sm sticky top-4">
                         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
 
-                        <div className="space-y-4">
-                            {cartItems?.map((item: any) => (
-                                <div key={item.id} className="flex gap-4">
-                                    <div className="relative w-20 h-20">
-                                        {Array.isArray(item.images) ? (
-                                            <Image
-                                                src={item.images?.[0]}
-                                                alt={item.name}
-                                                fill
-                                                className="object-cover rounded-md"
-                                            />
-                                        ) : (
-                                            <Image
-                                                src={item.image}
-                                                alt={item.name}
-                                                fill
-                                                className="object-cover rounded-md"
-                                            />
-                                        )}
+                        {/* Coupon Section */}
+                        <div className="mb-4">
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <FiTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value)}
+                                        placeholder="Enter coupon code"
+                                        className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        disabled={!!appliedCoupon}
+                                    />
+                                </div>
+                                {!appliedCoupon ? (
+                                    <button
+                                        onClick={handleCouponApply}
+                                        disabled={isVerifyingCoupon}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50"
+                                    >
+                                        {isVerifyingCoupon ? 'Applying...' : 'Apply'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleRemoveCoupon}
+                                        className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-50"
+                                    >
+                                        Remove
+                                    </button>
+                                )}
+                            </div>
+                            {appliedCoupon && (
+                                <p className="mt-2 text-sm text-green-600">
+                                    Coupon applied: {appliedCoupon.code} ({appliedCoupon.value}% off)
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="space-y-4 mb-4">
+                            {cartItems.map((item) => (
+                                <div key={item.id} className="flex items-center gap-4">
+                                    <div className="relative w-16 h-16">
+                                        <Image
+                                            src={item.image}
+                                            alt={item.name}
+                                            fill
+                                            className="object-cover rounded-md"
+                                        />
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-medium">{item.name}</h3>
-                                        <p className="text-sm text-gray-500">Quantity: {item.quantity || 1}</p>
-                                        <p className="text-orange-500 font-semibold">
-                                            ৳{((item.price * (item.quantity || 1))).toLocaleString()}
+                                        <p className="text-sm text-gray-500">
+                                            {item.quantity} x ৳{item.price}
                                         </p>
                                     </div>
+                                    <p className="font-medium">৳{item.price * item.quantity}</p>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="border-t mt-4 pt-4 space-y-2">
+                        {/* Order Totals */}
+                        <div className="border-t pt-4 space-y-2">
                             <div className="flex justify-between">
-                                <span>Subtotal</span>
+                                <span className="text-gray-600">Subtotal</span>
                                 <span>৳{total.toLocaleString()}</span>
                             </div>
+                            {appliedCoupon && (
+                                <div className="flex justify-between text-green-600">
+                                    <span>Discount ({appliedCoupon.value}%)</span>
+                                    <span>-৳{discount.toLocaleString()}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between">
-                                <span>Shipping</span>
+                                <span className="text-gray-600">Shipping</span>
                                 <span>৳{shippingInfo.cost.toLocaleString()}</span>
                             </div>
-                            {shippingInfo.cost > 0 && (
-                                <p className="text-sm text-gray-500">
-                                    Estimated delivery: {shippingInfo.estimatedDays} day{shippingInfo.estimatedDays > 1 ? 's' : ''}
-                                </p>
-                            )}
-                            {total >= 5000 && (
-                                <p className="text-sm text-green-500">
-                                    Free shipping for orders above ৳5,000
-                                </p>
-                            )}
-                            <div className="border-t pt-2 mt-2">
-                                <div className="flex justify-between font-semibold">
-                                    <span>Total</span>
-                                    <span>৳{finalTotal.toLocaleString()}</span>
-                                </div>
+                            <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                                <span>Total</span>
+                                <span>৳{finalTotal.toLocaleString()}</span>
                             </div>
                         </div>
+
+                        {/* Place Order Button */}
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className={`w-full mt-6 bg-orange-500 text-white py-3 rounded-md hover:bg-orange-600 transition-colors ${
+                                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        >
+                            {isSubmitting ? 'Processing...' : 'Place Order'}
+                        </button>
                     </div>
                 </div>
             </div>

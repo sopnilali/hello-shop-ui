@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${notoSerifBengali.variable} ${roboto.variable} font-roboto `}>
+      <body className={`${notoSerifBengali.variable} ${roboto.variable} font-roboto`}>
         <ProvidersWrapper>
           {children}
         </ProvidersWrapper>

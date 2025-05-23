@@ -28,7 +28,7 @@ export const middleware = async (request: NextRequest) => {
     } else {
       return NextResponse.redirect(
         new URL(
-          `https://hello-shop-eight.vercel.app/login?redirectPath=${pathname}`,
+          `${process.env.NEXT_PUBLIC_CLIENT_URL}/login?redirectPath=${pathname}`,
           request.url
         )
       );

@@ -9,8 +9,9 @@ import UpdateProductModal from "./UpdateProductModal";
 import { useAllProductsQuery, useAddProductMutation, useDeleteProductMutation, } from "@/components/Redux/features/products/productsApi";
 import { useAllbrandsQuery } from "@/components/Redux/features/brands/brandsApi";
 import { useAllcategoriesQuery } from "@/components/Redux/features/category/categoryApi";
+import { useAllShopQuery } from "@/components/Redux/features/shop/shopApi";
 
-const ManageProduct = () => { 
+const ManageProduct = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -21,6 +22,7 @@ const ManageProduct = () => {
   const { data: categories } = useAllcategoriesQuery(undefined);
   const [addProduct] = useAddProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
+  const { data: shops } = useAllShopQuery(undefined);
 
   const Allproducts = products?.data?.data; // all products
 
@@ -32,6 +34,7 @@ const ManageProduct = () => {
     categoryId: "",
     brandId: "",
     quantity: "",
+    shopId: "",
   });
 
   const [previewImages, setPreviewImages] = useState<string[]>([]);
@@ -65,7 +68,7 @@ const ManageProduct = () => {
     if (files) {
       const newImages = Array.from(files);
       setImagesFiles(prevImages => [...prevImages, ...newImages]);
-      
+
       const newPreviewImages = newImages.map(file => URL.createObjectURL(file));
       setPreviewImages(prevPreviews => [...prevPreviews, ...newPreviewImages]);
     }
@@ -121,6 +124,7 @@ const ManageProduct = () => {
       categoryId: formData.categoryId,
       brandId: formData.brandId,
       quantity: parseInt(formData.quantity || '0'),
+      shopId: formData.shopId,
     };
 
     // Build FormData
@@ -145,6 +149,7 @@ const ManageProduct = () => {
         categoryId: "",
         brandId: "",
         quantity: "",
+        shopId: "",
       });
       clearImages();
       refetch();
@@ -185,11 +190,12 @@ const ManageProduct = () => {
             <table className="w-full">
               <thead className="bg-gray-800 transition-colors">
                 <tr>
-                  <th className="px-6 py-4 text-left">Name</th>
+                  <th className="px-6 py-4 text-left ">Name</th>
                   <th className="px-6 py-4 text-left">Category</th>
                   <th className="px-6 py-4 text-left">Brand</th>
                   <th className="px-6 py-4 text-left">Price</th>
                   <th className="px-6 py-4 text-left">Weight</th>
+                  <th className="px-6 py-4 text-left">Shop</th>
                   <th className="px-6 py-4 text-left">Quantity</th>
                   <th className="px-6 py-4 text-left">Status</th>
                   <th className="px-6 py-4 text-left">Actions</th>
@@ -203,19 +209,20 @@ const ManageProduct = () => {
                     animate={{ opacity: 1 }}
                     className="border-t border-gray-700 hover:bg-gray-800/50 transition-colors"
                   >
-                    <td className="px-6 py-4">{product.name}</td>
-                    <td className="px-6 py-4">{product.category?.name}</td>
-                    <td className="px-6 py-4">{product.brand?.name}</td>
-                    <td className="px-6 py-4">${product.price}</td>
-                    <td className="px-6 py-4">{product.weight} kg</td>
-                    <td className="px-6 py-4">{product.quantity}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 tracking-wider">{product.name}</td>
+                    <td className="px-6 py-4 tracking-wider">{product.category?.name}</td>
+                    <td className="px-6 py-4 tracking-wider">{product.brand?.name}</td>
+                    <td className="px-6 py-4 tracking-wider">${product.price}</td>
+                    <td className="px-6 py-4 tracking-wider">{product.weight} kg</td>
+                    <td className="px-6 py-4 tracking-wider">{product.shop?.name}</td>
+                    <td className="px-6 py-4 tracking-wider">{product.quantity}</td>
+                    <td className="px-6 py-4 tracking-wider">
                       <span className={`px-2 py-1 rounded-full text-sm border ${product.status === 'SOLD' ? 'border-green-500/20 text-green-400' : 'border-yellow-500/20 text-yellow-400'
                         }`}>
                         {product.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-2xl flex gap-3">
+                    <td className="px-6 py-4 text-2xl flex gap-3 tracking-wider">
                       <MdDeleteOutline
                         className="cursor-pointer hover:text-red-500 transition-colors"
                         onClick={() => handleDelete(product.id)}
@@ -261,7 +268,7 @@ const ManageProduct = () => {
 
                 {/* Image Upload */}
                 <div className="mb-6">
-                  <div 
+                  <div
                     className="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center"
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
@@ -335,7 +342,7 @@ const ManageProduct = () => {
                         required
                         min="0"
                         step="0.01"
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:gray-blue-500"
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
                       />
                     </div>
 
@@ -354,6 +361,27 @@ const ManageProduct = () => {
                         step="0.01"
                         className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
                       />
+                    </div>
+                    {/* Shop Selection */}
+                    <div className="mb-6">
+                      <label htmlFor="shopId" className="block text-sm font-medium text-gray-300 mb-1">
+                        Shop
+                      </label>
+                      <select
+                        id="shopId"
+                        name="shopId"
+                        value={formData.shopId}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      >
+                        <option value="">Select a shop</option>
+                        {shops && shops.data.map((shop: any) => (
+                          <option key={shop.id} value={shop.id}>
+                            {shop.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -398,7 +426,7 @@ const ManageProduct = () => {
                         ))}
                       </select>
                     </div>
-                    
+
                     {/* Category */}
                     <div className="mb-4">
                       <label htmlFor="categoryId" className="block text-sm font-medium text-gray-300 mb-1">
@@ -452,6 +480,7 @@ const ManageProduct = () => {
                         categoryId: "",
                         brandId: "",
                         quantity: "",
+                        shopId: "",
                       });
                       clearImages();
                     }}
