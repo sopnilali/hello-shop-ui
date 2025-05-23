@@ -1,18 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { FiGrid, FiLogOut, FiShoppingCart, FiUser, FiX, FiPlus, FiMinus, FiTrash2, FiSearch } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAppDispatch, useAppSelector } from "../Redux/hooks";
-import { setUser } from "../Redux/features/auth/authSlice";
-import { removeFromCart, updateQuantity } from "../Redux/features/cart/cartSlice";
-import Cookies from 'js-cookie';
-import { redirect, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import Image from "next/image";
+import React, { useState, useEffect, } from "react";
 import PrimaryNavbar from "./PrimaryNavbar";
-import SecondaryNavbar from "./SecondaryNavbar";
 
 
 const Navbar = () => {

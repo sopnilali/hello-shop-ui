@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSingleProductQuery } from '@/components/Redux/features/products/productsApi';
 import { useAppDispatch, useAppSelector } from '@/components/Redux/hooks';
 import { addToCart } from '@/components/Redux/features/cart/cartSlice';
-import { toast } from 'sonner';
+import customToast from '@/components/Shared/customToast';
 import AddToWishlistButton from '@/components/DashboardLayout/Wishlist/AddToWishlistButton';
 import { Rating } from '@smastrom/react-rating';
 import "@smastrom/react-rating/style.css";
@@ -124,9 +124,11 @@ const ProductDetails = () => {
     if (isError) return <div>Error loading product details</div>;
     if (!product || !product.data) return <div>No product data available</div>;
 
-    const { images, name, price, description, weight, dimensions, origin, brand, category, orderItems } = product.data;
+    const { images, name, price, description, weight, dimensions, origin, brand, category, orderItems, discount } = product.data;
 
     const totalQuantity = orderItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
+
+    const discountedPrice = discount ? price * (1 - discount.value / 100) : price;
 
     const handleIncrement = () => {
         setQuantity(prev => prev + 1);
@@ -140,7 +142,7 @@ const ProductDetails = () => {
 
     const handleAuthCheck = () => {
         if (!user) {
-            toast.error('Please login first to continue');
+            customToast('Please login first to continue', 'error', 'loading...');
             router.push('/login?redirectPath=/product/' + id);
             return false;
         }
@@ -153,11 +155,11 @@ const ProductDetails = () => {
         dispatch(addToCart({
             id: id as string,
             name,
-            price,
+            price: discountedPrice,
             quantity,
             image: images[selectedImage]
         }));
-        toast.success('Product added to cart');
+        customToast('Product added to cart', 'success', 'loading...');
         router.push('/cart');
     };
 
@@ -167,7 +169,7 @@ const ProductDetails = () => {
         dispatch(addToCart({
             id: id as string,
             name,
-            price,
+            price: discountedPrice,
             quantity,
             image: images[selectedImage]
         }));
@@ -175,11 +177,8 @@ const ProductDetails = () => {
     };
 
     const onSubmit = async (data: ReviewFormData) => {
-        const toastId = toast.loading("Adding Review...");
         if (!user.id) {
-            toast.error("User information not available. Please try again later.", {
-                id: toastId,
-            });
+            customToast("User information not available. Please try again later.", "error", "loading...");
             return;
         }
 
@@ -193,30 +192,26 @@ const ProductDetails = () => {
             const res = await addReview(reviewData).unwrap();
 
             if (res?.success) {
-                toast.success(res?.message || "Your review is Pending", {
-                    id: toastId,
-                });
+                customToast(res?.message || "Your review is Pending", "success", "loading...");
                 reset();
                 setRating(0);
                 refetchProductDetails();
             } else {
-                toast.error(res?.message || "Failed to add review", { id: toastId });
+                customToast(res?.message || "Failed to add review", "error", "loading...");
             }
         } catch (error: any) {
             console.error("Review submission error:", error);
-            toast.error(error?.data?.message || "Something went wrong", {
-                id: toastId,
-            });
+            customToast(error?.data?.message || "Something went wrong", "error", "loading...");
         }
     };
 
     const handleSendEnquiry = () => {
         if (!enquiryMessage.trim()) {
-            toast.error('Please enter a message');
+            customToast('Please enter a message', 'error', 'loading...');
             return;
         }
         // Add your enquiry sending logic here
-        toast.success('Message sent to seller');
+        customToast('Message sent to seller', 'success', 'loading...');
         setEnquiryMessage('');
         setIsEnquiryModalOpen(false);
     };
@@ -339,21 +334,23 @@ const ProductDetails = () => {
                         <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden">
                             <Image
                                 src={images[selectedImage]}
-                                alt="Product Image"
+                                alt={name}
                                 fill
                                 className="object-cover"
                             />
                         </div>
                         <div className="grid grid-cols-4 gap-2 mt-4">
-                            {images.map((image: string, idx: number) => (
+                            {images.map((image: string, index: number) => (
                                 <div
-                                    key={idx}
-                                    className={`relative h-16 sm:h-20 md:h-24 rounded-md overflow-hidden cursor-pointer border ${selectedImage === idx ? 'border-orange-500' : 'hover:border-orange-500'}`}
-                                    onClick={() => setSelectedImage(idx)}
+                                    key={index}
+                                    className={`relative h-16 sm:h-20 md:h-24 rounded-md overflow-hidden cursor-pointer ${
+                                        selectedImage === index ? 'ring-2 ring-[#ff4500]' : ''
+                                    }`}
+                                    onClick={() => setSelectedImage(index)}
                                 >
                                     <Image
                                         src={image}
-                                        alt={`Thumbnail ${idx + 1}`}
+                                        alt={`${name} - Image ${index + 1}`}
                                         fill
                                         className="object-cover"
                                     />
@@ -364,13 +361,34 @@ const ProductDetails = () => {
 
                     {/* Product Info */}
                     <div className="flex-1 space-y-4 mt-6 md:mt-0">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                            <h1 className="text-2xl sm:text-3xl font-semibold">{name}</h1>
-                            <AddToWishlistButton item={{ id: id as string, name, price, image: images[selectedImage] }} />
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{name}</h1>
+                            <AddToWishlistButton item={{
+                                id: id as string,
+                                name,
+                                price,
+                                image: images[selectedImage]
+                            }} />
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <span className="text-xl sm:text-2xl font-bold text-orange-500">৳{price.toLocaleString()}</span>
+                        <div className="flex items-center gap-2">
+                            {discount ? (
+                                <>
+                                    <span className="text-2xl font-bold text-[#ff4500]">
+                                        ৳{discountedPrice.toFixed(2)}
+                                    </span>
+                                    <span className="text-lg text-gray-500 line-through">
+                                        ৳{price.toFixed(2)}
+                                    </span>
+                                    <span className="bg-[#ff4500] text-white px-2 py-1 rounded text-sm">
+                                        {discount.value}% OFF
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-2xl font-bold text-[#ff4500]">
+                                    ৳{price.toFixed(2)}
+                                </span>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -420,37 +438,52 @@ const ProductDetails = () => {
                         <div className="flex flex-col lg:flex-row sm:flex-row  lg:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col space-y-2">
-                                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Seller Information</h4>
+                                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Shop Information</h4>
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <FiUser className="w-4 h-4 text-gray-400" />
-                                            <span className="text-gray-700">{product.data.seller?.name || 'Unknown Seller'}</span>
+                                            <FiInfo className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-700">{product.data.shop?.name || 'Unknown Shop'}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <FiMail className="w-4 h-4 text-gray-400" />
-                                            <span className="text-gray-700">{product.data.seller?.email || 'Unknown Seller'}</span>
+                                            <FiInfo className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-700">{product.data.shop?.description || 'No description available'}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <FaWhatsapp className="w-4 h-4 text-gray-400" />
-                                            <span className="text-gray-700">{product.data.seller?.phoneNumber || 'Unknown Seller'}</span>
+                                        <div className="border-t pt-2 mt-2">
+                                            <h5 className="text-sm font-medium text-gray-500 mb-2">Shop Owner</h5>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <FiUser className="w-4 h-4 text-gray-400" />
+                                                    <span className="text-gray-700">{product.data.shop?.owner?.name || 'Unknown Owner'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <FiMail className="w-4 h-4 text-gray-400" />
+                                                    <span className="text-gray-700">{product.data.shop?.owner?.email || 'No email available'}</span>
+                                                </div>
+                                                {product.data.shop?.owner?.phoneNumber && (
+                                                    <div className="flex items-center gap-2">
+                                                        <FaWhatsapp className="w-4 h-4 text-gray-400" />
+                                                        <span className="text-gray-700">{product.data.shop.owner.phoneNumber}</span>
+                                                    </div>
+                                                )}
+                                                {product.data.shop?.owner?.address && (
+                                                    <div className="flex items-center gap-2">
+                                                        <FiInfo className="w-4 h-4 text-gray-400" />
+                                                        <span className="text-gray-700">{product.data.shop.owner.address}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setIsEnquiryModalOpen(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
-                                >
-                                    <FiMessageSquare className="w-4 h-4" />
-                                    <span>Enquire</span>
-                                </button>
+
                                 <button
                                     className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
                                     title="Share Product"
                                 >
                                     <FiShare className="w-4 h-4" />
-                                    <span className=" sm:inline" onClick={() => {
+                                    <span className="sm:inline" onClick={() => {
                                         if (navigator.share) {
                                             navigator.share({
                                                 title: product.data.name,
@@ -462,8 +495,8 @@ const ProductDetails = () => {
                                             // Fallback for browsers that don't support Web Share API
                                             const shareUrl = window.location.href;
                                             navigator.clipboard.writeText(shareUrl)
-                                                .then(() => toast.success('Link copied to clipboard!'))
-                                                .catch(() => toast.error('Failed to copy link'));
+                                                .then(() => customToast('Link copie d to clipboard!', 'success', 'loading...'))
+                                                .catch(() => customToast('Failed to copy link', 'error', 'loading...'));
                                         }
                                     }}>Share</span>
                                 </button>
@@ -475,7 +508,7 @@ const ProductDetails = () => {
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                                 <div className="bg-white rounded-lg p-6 w-full max-w-md">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-semibold">Send Message to Seller</h3>
+                                        <h3 className="text-lg font-semibold">Contact Shop</h3>
                                         <button
                                             onClick={() => setIsEnquiryModalOpen(false)}
                                             className="text-gray-500 hover:text-gray-700"
@@ -484,10 +517,14 @@ const ProductDetails = () => {
                                         </button>
                                     </div>
                                     <div className="space-y-4">
+                                        <div className="text-sm text-gray-600 mb-2">
+                                            <p>Shop: {product.data.shop?.name}</p>
+                                            <p>Owner: {product.data.shop?.owner?.name}</p>
+                                        </div>
                                         <textarea
                                             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                             rows={4}
-                                            placeholder="Type your message here..."
+                                            placeholder="Type your message to the shop..."
                                             value={enquiryMessage}
                                             onChange={(e) => setEnquiryMessage(e.target.value)}
                                         />

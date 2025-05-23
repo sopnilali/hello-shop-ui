@@ -3,7 +3,7 @@ import Link from "next/link";
 import { X } from "lucide-react"; // Optional: use any icon library you prefer
 import { usePathname } from "next/navigation";
 import {  MdCategory, MdRateReview, MdReviews, MdSpaceDashboard } from "react-icons/md";
-import { FaProductHunt, FaShoePrints, FaUsers } from "react-icons/fa";
+import { FaProductHunt, FaShoePrints, FaTag, FaUsers } from "react-icons/fa";
 import { useAppSelector } from "@/components/Redux/hooks";
 import { RiCoupon2Fill, RiOrderPlayFill } from "react-icons/ri";
 import { FaBlog, FaShop } from "react-icons/fa6";
@@ -37,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     menuItems.splice(4, 0, { name: "Shop", icon: <FaShop />, link: "/dashboard/shops" });
     menuItems.splice(5, 0, { name: "Coupons", icon: <RiCoupon2Fill />, link: "/dashboard/coupons" });
     menuItems.splice(6, 0, { name: "Blog", icon: <FaBlog />, link: "/dashboard/blog" });
+    menuItems.splice(7, 0, { name: "Discount", icon: <FaTag />, link: "/dashboard/discount" });
   }
 
   // Add Users route only for ADMIN role
@@ -47,6 +48,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     menuItems.splice(5, 0, { name: "Reviews", icon: <MdRateReview />, link: "/dashboard/reviews" });
     menuItems.splice(6, 0, { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" });
     menuItems.splice(7, 0, { name: "Blog", icon: <FaBlog />, link: "/dashboard/blog" });
+    menuItems.splice(8, 0, { name: "Discount", icon: <FaTag />, link: "/dashboard/discount" });
+
   }
 
   return (
