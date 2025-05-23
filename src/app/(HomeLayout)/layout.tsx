@@ -1,12 +1,13 @@
 import Footer from "@/components/Shared/Footer";
 import Navbar from "@/components/Shared/Navbar";
+import LayoutWraper from "@/components/Layouts/LayoutWraper";
 
 const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     return (
       <div>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+        <LayoutWraper>
+          {children}
+        </LayoutWraper>
       </div>
     );
   };

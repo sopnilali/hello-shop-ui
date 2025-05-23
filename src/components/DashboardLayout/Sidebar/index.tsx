@@ -2,10 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { X } from "lucide-react"; // Optional: use any icon library you prefer
 import { usePathname } from "next/navigation";
-import { MdCategory, MdDiscount, MdMovie, MdPerson, MdRateReview, MdSpaceDashboard } from "react-icons/md";
-import { FaUsers } from "react-icons/fa";
+import {  MdCategory, MdRateReview, MdReviews, MdSpaceDashboard } from "react-icons/md";
+import { FaProductHunt, FaShoePrints, FaUsers } from "react-icons/fa";
 import { useAppSelector } from "@/components/Redux/hooks";
-import { RiOrderPlayFill } from "react-icons/ri";
+import { RiCoupon2Fill, RiOrderPlayFill } from "react-icons/ri";
+import { FaBlog, FaShop } from "react-icons/fa6";
 
 interface User {
   id: string;
@@ -23,16 +24,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   const user = useAppSelector((state) => state.auth.user) as User | null;
   const pathname = usePathname();
 
-  const menuItems = [
+  const menuItems = [ // common menu items
     { name: "Overview", icon: <MdSpaceDashboard />, link: "/dashboard" },
-    { name: "Products", icon: <MdMovie />, link: "/dashboard/products" },
-    { name: "Sub & Category", icon: <MdRateReview />, link: "/dashboard/brand-category" },
-    { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" },
+    { name: "Products", icon: <FaProductHunt />, link: "/dashboard/products" },
+    { name: "Sub & Category", icon: <MdCategory />, link: "/dashboard/brand-category" },
   ];
 
   // Add Users route only for ADMIN role
-  if (user?.role === "ADMIN") {
+  if (user?.role === "SELLER") { // seller menu items
+    menuItems.splice(3, 0, { name: "Reviews", icon: <MdRateReview />, link: "/dashboard/reviews" });
+    menuItems.splice(3, 0, { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" });
+    menuItems.splice(4, 0, { name: "Shop", icon: <FaShop />, link: "/dashboard/shops" });
+    menuItems.splice(5, 0, { name: "Coupons", icon: <RiCoupon2Fill />, link: "/dashboard/coupons" });
+    menuItems.splice(6, 0, { name: "Blog", icon: <FaBlog />, link: "/dashboard/blog" });
+  }
+
+  // Add Users route only for ADMIN role
+  if (user?.role === "ADMIN") { // admin menu items
     menuItems.splice(2, 0, { name: "Users", icon: <FaUsers />, link: "/dashboard/users" });
+    menuItems.splice(3, 0, { name: "Coupons", icon: <RiCoupon2Fill />, link: "/dashboard/coupons" });
+    menuItems.splice(4, 0, { name: "Shop", icon: <FaShop />, link: "/dashboard/shops" });
+    menuItems.splice(5, 0, { name: "Reviews", icon: <MdRateReview />, link: "/dashboard/reviews" });
+    menuItems.splice(6, 0, { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" });
+    menuItems.splice(7, 0, { name: "Blog", icon: <FaBlog />, link: "/dashboard/blog" });
   }
 
   return (

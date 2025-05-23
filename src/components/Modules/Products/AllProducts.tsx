@@ -16,6 +16,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Rating } from '@smastrom/react-rating'
 import '@smastrom/react-rating/style.css'
+import { useAppSelector } from '@/components/Redux/hooks'
 
 
 const AllProducts: React.FC = () => {
@@ -30,6 +31,7 @@ const AllProducts: React.FC = () => {
   const [sortOrder, setSortOrder] = useState('asc')
   const [columns, setColumns] = useState(4)
   const [searchQuery, setSearchQuery] = useState('')
+  const { items } = useAppSelector((state: any) => state.cart)
 
   const user = useSelector((state: any) => state.auth.user)
 
@@ -158,20 +160,57 @@ const AllProducts: React.FC = () => {
     setViewType('grid')
   }
 
-  const handleAddToCart = (product: any) => {
-    dispatch(addToCart({ ...product, quantity: 1 }))
-    toast.success('Product added to cart')
-  }
-
-  const handleBuyNow = (product: any) => {
-    if (user) {
-      dispatch(addToCart({ ...product, quantity: 1 }))
-      router.push('/checkout')
-    } else {
-      toast.error('Please login first')
-      router.push('/login')
+  const handleAuthCheck = () => {
+    if (!user) {
+      toast.error('Please login first to continue');
+      router.push('/login?redirectPath=/products');
+      return false;
     }
-  }
+    return true;
+  };
+
+  const handleAddToCart = (product: any) => {
+    if (!handleAuthCheck()) return;
+
+    // Check if product is already in cart
+    const existingItem = items.find((item: any) => item.id === product.id);
+    if (existingItem) {
+      toast.error('Product is already in your cart');
+      return;
+    }
+
+    // Ensure we have a valid image URL
+    const imageUrl = Array.isArray(product.images) && product.images.length > 0 
+      ? product.images[0] 
+      : product.image || '/placeholder.png';
+
+    dispatch(addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: imageUrl
+    }));
+    toast.success('Product added to cart');
+  };
+
+  // const handleBuyNow = (product: any) => {
+  //   if (!handleAuthCheck()) return;
+
+  //   // Ensure we have a valid image URL
+  //   const imageUrl = Array.isArray(product.images) && product.images.length > 0 
+  //     ? product.images[0] 
+  //     : product.image || '/placeholder.png';
+
+  //   dispatch(addToCart({
+  //     id: product.id,
+  //     name: product.name,
+  //     price: product.price,
+  //     quantity: 1,
+  //     image: imageUrl // Use the first image from the array or fallback to single image
+  //   }));
+  //   router.push('/checkout');
+  // };
 
   const updateSearchQuery = (newParams: Record<string, string | number>) => {
     const currentParams = new URLSearchParams(window.location.search)
@@ -214,7 +253,7 @@ const AllProducts: React.FC = () => {
               setSearchQuery(value);
               // Debounce search to avoid too many API calls
               const timeoutId = setTimeout(() => {
-                updateSearchQuery({ search: value });
+                updateSearchQuery({ searchTerm: value });
               }, 500);
               return () => clearTimeout(timeoutId);
             }}
@@ -228,7 +267,7 @@ const AllProducts: React.FC = () => {
           <button
             onClick={() => {
               setSearchQuery('');
-              updateSearchQuery({ search: '' });
+              updateSearchQuery({ searchTerm: '' });
             }}
             className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition-colors'
             aria-label="Clear search"
@@ -447,13 +486,10 @@ const AllProducts: React.FC = () => {
               </div>
             </div>
             {isFilterLoading ? (
-              <div className={viewType === 'grid' 
-                ? `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-${columns} gap-3 sm:gap-4 lg:gap-6` 
-                : 'flex flex-col gap-4'
-              }>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 {Array(8).fill(null).map((_, index) => (
-                  <div key={index} className="bg-white border  border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="relative h-48 sm:h-52 md:h-56 mb-4 bg-gray-200 animate-pulse rounded-t-xl"></div>
+                  <div key={index} className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 h-full">
+                    <div className="relative h-48 bg-gray-200 animate-pulse rounded-t-2xl"></div>
                     <div className="p-4">
                       <div className="space-y-3">
                         <div className="h-6 bg-gray-200 rounded animate-pulse w-3/4"></div>
@@ -477,70 +513,54 @@ const AllProducts: React.FC = () => {
                 <p className="text-gray-600">Try adjusting your search or filter criteria</p>
               </div>
             ) : (
-              <div className={viewType === 'grid' 
-                ? `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6` 
-                : 'flex flex-col gap-4'
-              }>
-                {filteredProducts.map((product: any) => {
-                  return viewType === 'grid' ? (
-                    <div key={product.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group">
-                      <div className="relative h-48 sm:h-52 md:h-56 overflow-hidden rounded-t-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                {filteredProducts.map((product: any) => (
+                  <div key={product.id} className="bg-white rounded-2xl shadow-md border border-gray-200 p-0 flex flex-col h-full transition hover:shadow-lg">
+                    <div className="rounded-t-2xl overflow-hidden">
+                      <div className="relative w-full h-48">
                         <Image
                           src={product.images[0]}
                           alt={product.name}
                           fill
-                          className="object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover"
+                          style={{ borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}
+                          sizes="(max-width: 768px) 100vw, 20vw"
                         />
                       </div>
-                      <div className="p-4">
-                        <Link 
-                          href={`/product/${product.id}`} 
-                          className="block text-lg font-semibold mb-2 hover:text-orange-600 text-gray-800 transition-colors duration-300 line-clamp-2"
-                        >
+                    </div>
+                    <div className="p-4 flex flex-col flex-1">
+                      <div>
+                        <Link href={`/product/${product.id}`} className="font-roboto  hover:text-orange-600 text-base font-semibold text-gray-800 leading-tight line-clamp-2">
                           {product.name}
                         </Link>
+                        <div className="flex justify-between items-center mt-1 relative">
+                          {product.rating && (
+                            <Rating 
+                              value={product.rating} 
+                              readOnly 
+                              style={{ maxWidth: 80 }}
+                            />
+                          )}
 
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                          <p className="text-lg font-bold text-orange-600">৳{product.price.toFixed(2)}</p>
-                          <button
-                            className="w-full sm:w-auto min-w-[100px] px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 active:transform active:scale-95 transition-all duration-300 text-sm"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            Add to Cart
-                          </button>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div key={product.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row gap-4 group">
-                      <div className="relative w-full sm:w-48 h-48 overflow-hidden rounded-t-xl">
-                        <Image
-                          src={product.images[0]}
-                          alt={product.name}
-                          fill
-                          className="object-cover rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="flex-1 p-4">
-                        <Link 
-                          href={`/product/${product.id}`} 
-                          className="block text-xl font-semibold mb-2 hover:text-orange-600 text-gray-800 transition-colors duration-300"
+
+                      {/* Footer section always at the bottom */}
+                      <div className="flex items-center justify-between mt-auto pt-4">
+                        <p className="text-lg font-bold text-orange-600">৳{product.price?.toFixed(2)}</p>
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="px-2 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors duration-300 text-sm font-semibold flex items-center gap-2"
                         >
-                          {product.name}
-                        </Link>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                          <p className="text-lg font-bold text-orange-600">৳{product.price.toFixed(2)}</p>
-                          <button
-                            className="w-full sm:w-auto min-w-[120px] px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 active:transform active:scale-95 transition-all duration-300 text-sm"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            Add to Cart
-                          </button>
-                        </div>
+                           
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>Add Cart
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
+                  </div> 
+                ))}
               </div>
             )}
           </main>

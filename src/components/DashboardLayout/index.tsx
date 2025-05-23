@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
+
+
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -29,7 +31,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-          {children}
+
+            {children}
+
         </main>
       </div>
     </div>

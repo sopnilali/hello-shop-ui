@@ -42,8 +42,18 @@ const slides = [
 
 const HeroSection = () => {
   const [selected, setSelected] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
     const interval = setInterval(() => {
       setSelected((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -55,7 +65,7 @@ const HeroSection = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-full flex flex-col md:flex-row items-center justify-between py-10 md:py-16 px-2 sm:px-4 md:px-16 min-h-[70vh] md:min-h-[80vh] lg:min-h-screen overflow-hidden gap-8 md:gap-0 bg-cover bg-center relative shadow-lg"
+      className="w-full flex flex-col md:flex-row items-center justify-between py-10 md:py-16 px-2 sm:px-4 md:px-16 lg:min-h-[60vh] overflow-hidden gap-8 md:gap-0 bg-cover bg-center relative shadow-lg"
       style={{
         backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.85) 60%, rgba(255,255,255,0.7)), url('${slides[selected].background}')`,
         backgroundPosition: 'center',

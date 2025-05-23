@@ -14,15 +14,19 @@ const reviewApi = baseApi.injectEndpoints({
         }),
 
         getAllReview: builder.query({
-            query: () => {
+            query: (args) => {
+                const params = new URLSearchParams();
+
+                if (args) {
+                    args?.forEach((item: any) => {
+                        params?.append(item?.name, item?.value as string);
+                    });
+                }
+
                 return {
                     url: "/review",
                     method: "GET",
-                };
-            },
-            transformResponse: (response: any) => {
-                return {
-                    data: response?.data || [],
+                    params: params,
                 };
             },
             providesTags: ["review"],
