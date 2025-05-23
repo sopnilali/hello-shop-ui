@@ -419,8 +419,28 @@ const AllProducts: React.FC = () => {
   }, []);
 
   return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Banner */}
+      <div className="relative container mx-auto rounded-md w-full h-[300px] mb-8 overflow-hidden mt-6">
+                        <Image
+          src="https://t4.ftcdn.net/jpg/07/05/76/83/360_F_705768379_6gKmh8xMy2TcauvQnUAhoCh9jnS9ci0n.jpg"
+          alt="Products Banner"
+                          fill
+                          className="object-cover"
+          priority
+                        />
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">Our Products</h1>
+            <p className="text-white text-lg">Discover our amazing collection of products</p>
+                      </div>
+                        </div>
+                      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto  ">
     <div className='w-full overflow-x-hidden'>
-      <div className='container mx-auto px-2 sm:px-6 py-6 sm:py-8 lg:py-8'>
+          <div className='container mx-auto py-6 sm:py-8 lg:py-8'>
         {/* Mobile Filter Button */}
         <div className="md:hidden flex justify-end mb-6 ">
           <button
@@ -564,6 +584,8 @@ const AllProducts: React.FC = () => {
               </div>
             )}
           </main>
+            </div>
+          </div>
         </div>
       </div>
     </div>

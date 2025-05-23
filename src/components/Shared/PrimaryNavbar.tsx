@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { removeFromCart, updateQuantity } from "../Redux/features/cart/cartSlice";
+import CategoryMegaMenu from './CategoryMegaMenu';
 
 interface User {
   id: string;
@@ -22,6 +23,7 @@ const PrimaryNavbar = () => {
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCategoryHovered, setIsCategoryHovered] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -130,7 +132,20 @@ const PrimaryNavbar = () => {
             <Link href="/product" className="text-gray-700 hover:text-[#ff4500] transition-colors">Products</Link>
             <Link href="/offers" className="text-gray-700 hover:text-[#ff4500] transition-colors">Offers</Link>
             <Link href="/blog" className="text-gray-700 hover:text-[#ff4500] transition-colors">Blog</Link>
-            <Link href="/category" className="text-gray-700 hover:text-[#ff4500] transition-colors">Category</Link>
+            <div 
+              className="relative"
+              onMouseEnter={() => setIsCategoryHovered(true)}
+              onMouseLeave={() => setIsCategoryHovered(false)}
+            >
+              <Link 
+                href="/product?sortOrder=asc&sortBy=price&categoryId" 
+                className="text-gray-700 hover:text-[#ff4500] transition-colors"
+              >
+                Category
+              </Link>
+              <div className="absolute top-full left-0 w-[500px]  bg-transparent" />
+              <CategoryMegaMenu isOpen={isCategoryHovered} />
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -242,6 +257,26 @@ const PrimaryNavbar = () => {
                   <FiX size={24} />
                 </button>
               </div>
+
+              {/* Search Bar */}
+              <div className="p-4 border-b">
+                <form onSubmit={handleSearch} className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products..."
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#ff4500]"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#ff4500]"
+                  >
+                    <FiSearch size={20} />
+                  </button>
+                </form>
+              </div>
+
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="space-y-4">
                   <Link href="/" className="block text-gray-700 hover:text-[#ff4500] transition-colors">Home</Link>

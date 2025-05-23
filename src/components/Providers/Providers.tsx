@@ -16,8 +16,6 @@ export const Providers = ({ children }: { children: ReactNode }) => {
           <Toaster
             position="top-center"
             duration={2000}
-            richColors
-            theme="light"
           />
         </>
       </PersistGate>

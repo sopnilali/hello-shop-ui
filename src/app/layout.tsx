@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Serif_Bengali, Roboto } from "next/font/google";
 import "./globals.css";
 import ProvidersWrapper from "@/components/Providers/ProvidersWrapper";
+import { Toaster } from "sonner";
 
 const notoSerifBengali = Noto_Serif_Bengali({
   weight: ['400', '500', '600', '700'],

@@ -6,6 +6,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { FaPen } from "react-icons/fa6";
 import { MdDiscount } from "react-icons/md";
 import UpdateProductModal from "./UpdateProductModal";
+import DiscountModal from "./DiscountModal";
 import { useAllProductsQuery, useAddProductMutation, useDeleteProductMutation, } from "@/components/Redux/features/products/productsApi";
 import { useAllbrandsQuery } from "@/components/Redux/features/brands/brandsApi";
 import { useAllcategoriesQuery } from "@/components/Redux/features/category/categoryApi";
@@ -15,8 +16,10 @@ const ManageProduct = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [productToUpdate, setProductToUpdate] = useState<any | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [productForDiscount, setProductForDiscount] = useState<string | null>(null);
   const { data: products, isError, refetch } = useAllProductsQuery(undefined);
   const { data: brands } = useAllbrandsQuery(undefined);
   const { data: categories } = useAllcategoriesQuery(undefined);
@@ -162,6 +165,11 @@ const ManageProduct = () => {
     }
   };
 
+  const handleDiscountClick = (productId: string) => {
+    setProductForDiscount(productId);
+    setIsDiscountModalOpen(true);
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -234,7 +242,10 @@ const ManageProduct = () => {
                           setIsUpdateModalOpen(true);
                         }}
                       />
-                      <MdDiscount className="cursor-pointer hover:text-cyan-500 text-xl transition-colors" />
+                      <MdDiscount 
+                        className="cursor-pointer hover:text-cyan-500 text-xl transition-colors" 
+                        onClick={() => handleDiscountClick(product.id)}
+                      />
                     </td>
                   </motion.tr>
                 ))}
@@ -508,6 +519,15 @@ const ManageProduct = () => {
         product={productToUpdate}
         categories={categories?.data}
         brands={brands?.data}
+      />
+
+      <DiscountModal
+        isOpen={isDiscountModalOpen}
+        onClose={() => {
+          setIsDiscountModalOpen(false);
+          setProductForDiscount(null);
+        }}
+        productId={productForDiscount || ""}
       />
 
       <AnimatePresence>
