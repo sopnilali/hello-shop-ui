@@ -8,9 +8,9 @@ const BannerAds = () => {
   const banners = [
     {
       id: 1,
-      title: "Special Mango Offer",
-      description: "Get 20% off on all premium mangoes",
-      link: "/product",
+      title: "Special Mango Offer - SUMMER50",
+      description: "Get 50% off on all premium mangoes",
+      link: "/offers",
       backgroundImage: "https://i.pinimg.com/736x/9d/45/1f/9d451fd38e78e0775582d3880feb9a39.jpg"
     },
     {

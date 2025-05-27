@@ -23,40 +23,12 @@ const CategoryMegaMenu = ({ isOpen }: { isOpen: boolean }) => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="absolute top-full min-w-[500px] left-0 bg-white/2 backdrop-blur-md shadow-lg rounded-md z-50 pt-2"
+          className="absolute top-full min-w-[500px] left-0 bg-white backdrop-blur-md shadow-lg rounded-md z-50 pt-2"
         >
           <div className="w-full py-3 px-2">
             <div className="flex items-center justify-between mb-2 px-2">
               <h3 className="text-base font-semibold text-gray-800">Popular Brands</h3>
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <FiSearch className="w-4 h-4 text-gray-600" />
-              </button>
             </div>
-
-            <AnimatePresence>
-              {showSearch && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="px-2 mb-3"
-                >
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search brands..."
-                      className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#ff4500]"
-                    />
-                    <FiSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <div className="grid grid-cols-3 gap-0">
               {filteredBrands?.map((brand: any) => (

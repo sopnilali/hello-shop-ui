@@ -49,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     menuItems.splice(6, 0, { name: "Order", icon: <RiOrderPlayFill />, link: "/dashboard/orders" });
     menuItems.splice(7, 0, { name: "Blog", icon: <FaBlog />, link: "/dashboard/blog" });
     menuItems.splice(8, 0, { name: "Discount", icon: <FaTag />, link: "/dashboard/discount" });
+    menuItems.splice(9, 0, { name: "BlogCategory", icon: <FaBlog />, link: "/dashboard/blog-category" });
 
   }
 

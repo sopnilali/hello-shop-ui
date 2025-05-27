@@ -5,8 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '../../Redux/features/cart/cartSlice'
-import customToast from '@/components/Shared/customToast'
 import { RootState } from '../../Redux/store'
+import { toast } from 'sonner'
 
 const DiscountPagess = () => {
   const {data: discounts, isLoading} = useGetActiveDiscountsQuery(undefined)
@@ -15,9 +15,9 @@ const DiscountPagess = () => {
 
   const handleAddToCart = (product: any) => {
     const isAlreadyInCart = cartItems.some((item) => item.id === product.id)
-    const toastId = 'loading...'
+    const toastId = toast.loading('Adding to cart...')
     if (isAlreadyInCart) {
-      customToast('Product already in cart!', 'warning', toastId)
+      toast.warning('Product already in cart!', { id: toastId })
       return
     }
 
@@ -28,17 +28,40 @@ const DiscountPagess = () => {
       image: product.images[0],
       quantity: 1
     }))
-    customToast('Product added to cart!', 'success', toastId)
+    toast.success('Product added to cart!', { id: toastId })
   }
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-[200px]">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff4500]"></div>
-    </div>
+    return (
+      <div className="container mx-auto">
+        {/* Banner Skeleton */}
+        <div className="relative w-full h-[300px] mb-8  rounded-lg overflow-hidden mt-6 bg-gray-200 animate-pulse" />
+
+        {/* Products Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="relative h-48 bg-gray-200 animate-pulse" />
+              <div className="p-4 space-y-3">
+                <div className="h-6 bg-gray-200 rounded animate-pulse" />
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-10 w-32 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto ">
+    <div className="container mx-auto">
       {/* Banner Section */}
       <div className="relative w-full h-[300px] mb-8 rounded-lg overflow-hidden mt-6">
         <Image
@@ -48,14 +71,15 @@ const DiscountPagess = () => {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-black">Special Offers</h1>
+
+        <div className="absolute inset-0 flex items-center bg-black/40 justify-center">
+          <h1 className="text-4xl font-bold text-white ">Special Offers</h1>
         </div>
       </div>
 
       {/* Discounted Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {discounts?.data?.map((discount: any) => (
+        {discounts?.data && discounts?.data.length > 0 ? discounts?.data.map((discount: any) => (
           <div key={discount.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div className="relative h-48">
               <Image
@@ -95,7 +119,11 @@ const DiscountPagess = () => {
               </div>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="flex items-center justify-center h-full">
+            <h1 className="text-2xl text-gray-500 text-center">No discounts found</h1>
+          </div>
+        )}
       </div>
     </div>
   )

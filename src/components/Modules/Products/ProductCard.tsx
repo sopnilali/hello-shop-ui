@@ -44,10 +44,7 @@ export const ProductCard = ({ product, loading }: { product?: any, loading?: boo
       <div className="p-4 flex flex-col flex-1">
         <div>
           <div className="font-roboto text-base font-semibold text-gray-800 leading-tight">
-            {product.name}{" "}
-            {product.weight && (
-              <span className="font-normal text-black">| {product.weight}</span>
-            )}KG
+         <Link className="hover:text-[#ff4500] transition-colors duration-300" href={`/product/${product.id}`}>{product.name}</Link>
           </div>
           {product.rating && (
             <div className="mt-1">

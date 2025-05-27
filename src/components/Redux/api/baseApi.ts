@@ -29,7 +29,9 @@ export const baseApi = createApi({
     "shop",
     "coupon",
     "blog",
-    "discount"
+    "blogCategory",
+    "discount",
+    "stats"
   ],
   endpoints: () => ({}),
 });

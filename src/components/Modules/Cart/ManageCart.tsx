@@ -47,13 +47,13 @@ const ManageCart = () => {
 
     if (cartItems.length === 0) {
         return (
-            <div className="container mx-auto px-4 py-16 text-center">
+            <div className="container mx-auto py-16 text-center">
                 <div className="max-w-md mx-auto">
                     <FiShoppingCart className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                     <h1 className="text-2xl font-semibold mb-4 text-gray-800">Your Shopping Cart is Empty</h1>
                     <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
                     <Link 
-                        href="/products" 
+                        href="/product" 
                         className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
                     >
                         Start Shopping
@@ -64,13 +64,13 @@ const ManageCart = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto  py-8">
             <h1 className="text-2xl font-semibold mb-8 text-gray-800">Shopping Cart</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-4">
                     {cartItems.map((item: CartItem) => (
-                        <div key={item.id} className="flex gap-4 border-b py-4 bg-white rounded-lg shadow-sm p-4">
+                        <div key={item.id} className="flex gap-4  py-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4">
                             <div className="relative w-24 h-24 flex-shrink-0">
                                 <Image
                                     src={Array.isArray(item.images) ? item.images[0] : item.image || '/placeholder.png'}

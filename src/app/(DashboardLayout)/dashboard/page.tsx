@@ -1,12 +1,13 @@
 'use client'
 
+import DashboardStats from '@/components/DashboardLayout/DashboardStats/DashboardStats'
 import React from 'react'
 
 const DashboardPage = () => {
 
   return (
     <div>
-      <h1>This is dashboardDashboard</h1>
+      <DashboardStats />
     </div>
   )
 }

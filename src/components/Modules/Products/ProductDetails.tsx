@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { FiMinus, FiPlus, FiShoppingCart, FiCreditCard, FiInfo, FiList, FiStar, FiShare, FiMessageSquare, FiX, FiUser, FiMail, FiPhone, FiRepeat } from 'react-icons/fi';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSingleProductQuery } from '@/components/Redux/features/products/productsApi';
 import { useAppDispatch, useAppSelector } from '@/components/Redux/hooks';
 import { addToCart } from '@/components/Redux/features/cart/cartSlice';
-import customToast from '@/components/Shared/customToast';
 import AddToWishlistButton from '@/components/DashboardLayout/Wishlist/AddToWishlistButton';
 import { Rating } from '@smastrom/react-rating';
 import "@smastrom/react-rating/style.css";
@@ -17,6 +16,7 @@ import { useForm } from 'react-hook-form';
 import { useCreateReviewMutation } from '@/components/Redux/features/review/reviewApi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { BiSolidData } from 'react-icons/bi';
+import { toast } from 'sonner';
 
 interface ReviewFormData {
     rating: number;
@@ -26,6 +26,7 @@ interface ReviewFormData {
 const ProductDetails = () => {
     const { id } = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
     const { user }: any = useAppSelector((state) => state.auth);
     const [addReview] = useCreateReviewMutation();
@@ -47,10 +48,9 @@ const ProductDetails = () => {
         formState: { errors },
         reset,
     } = useForm<ReviewFormData>();
-
     if (isLoading) return (
         <div className='w-full overflow-x-hidden bg-gray-50'>
-            <div className='container mx-auto px-2 sm:px-6 py-6 sm:py-8 lg:py-8'>
+            <div className='container mx-auto  py-6 sm:py-8 lg:py-8'>
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Image Skeleton */}
                     <div className="flex-1">
@@ -78,7 +78,7 @@ const ProductDetails = () => {
 
                         <div className="flex items-center gap-4">
                             <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
-                            <div className="flex items-center border rounded-md">
+                            <div className="flex items-center  rounded-md">
                                 <div className="h-10 w-24 bg-gray-200 animate-pulse"></div>
                             </div>
                         </div>
@@ -142,7 +142,7 @@ const ProductDetails = () => {
 
     const handleAuthCheck = () => {
         if (!user) {
-            customToast('Please login first to continue', 'error', 'loading...');
+            toast.warning('Please login to continue');
             router.push('/login?redirectPath=/product/' + id);
             return false;
         }
@@ -151,6 +151,7 @@ const ProductDetails = () => {
 
     const handleAddToCart = () => {
         if (!handleAuthCheck()) return;
+        const toastId = toast.loading('Adding to cart...');
 
         dispatch(addToCart({
             id: id as string,
@@ -159,7 +160,7 @@ const ProductDetails = () => {
             quantity,
             image: images[selectedImage]
         }));
-        customToast('Product added to cart', 'success', 'loading...');
+        toast.success('Product added to cart', { id: toastId });
         router.push('/cart');
     };
 
@@ -178,7 +179,7 @@ const ProductDetails = () => {
 
     const onSubmit = async (data: ReviewFormData) => {
         if (!user.id) {
-            customToast("User information not available. Please try again later.", "error", "loading...");
+            toast.error("User information not available. Please try again later.");
             return;
         }
 
@@ -192,26 +193,25 @@ const ProductDetails = () => {
             const res = await addReview(reviewData).unwrap();
 
             if (res?.success) {
-                customToast(res?.message || "Your review is Pending", "success", "loading...");
                 reset();
                 setRating(0);
                 refetchProductDetails();
+                toast.success("Review added successfully");
             } else {
-                customToast(res?.message || "Failed to add review", "error", "loading...");
+                toast.error(res?.message || "Failed to add review");
             }
         } catch (error: any) {
             console.error("Review submission error:", error);
-            customToast(error?.data?.message || "Something went wrong", "error", "loading...");
+            toast.error(error?.data?.message || "Something went wrong");
         }
     };
 
     const handleSendEnquiry = () => {
         if (!enquiryMessage.trim()) {
-            customToast('Please enter a message', 'error', 'loading...');
+            toast.error('Please enter a message');
             return;
         }
-        // Add your enquiry sending logic here
-        customToast('Message sent to seller', 'success', 'loading...');
+        toast.success('Message sent to seller');
         setEnquiryMessage('');
         setIsEnquiryModalOpen(false);
     };
@@ -327,7 +327,7 @@ const ProductDetails = () => {
 
     return (
         <div className='w-full overflow-x-hidden bg-gray-50'>
-            <div className='container mx-auto px-2 sm:px-6 py-6 sm:py-8 lg:py-8'>
+            <div className='container mx-auto  py-6 sm:py-8 lg:py-8'>
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Product Images */}
                     <div className="flex-1">
@@ -448,31 +448,6 @@ const ProductDetails = () => {
                                             <FiInfo className="w-4 h-4 text-gray-400" />
                                             <span className="text-gray-700">{product.data.shop?.description || 'No description available'}</span>
                                         </div>
-                                        <div className="border-t pt-2 mt-2">
-                                            <h5 className="text-sm font-medium text-gray-500 mb-2">Shop Owner</h5>
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <FiUser className="w-4 h-4 text-gray-400" />
-                                                    <span className="text-gray-700">{product.data.shop?.owner?.name || 'Unknown Owner'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <FiMail className="w-4 h-4 text-gray-400" />
-                                                    <span className="text-gray-700">{product.data.shop?.owner?.email || 'No email available'}</span>
-                                                </div>
-                                                {product.data.shop?.owner?.phoneNumber && (
-                                                    <div className="flex items-center gap-2">
-                                                        <FaWhatsapp className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-gray-700">{product.data.shop.owner.phoneNumber}</span>
-                                                    </div>
-                                                )}
-                                                {product.data.shop?.owner?.address && (
-                                                    <div className="flex items-center gap-2">
-                                                        <FiInfo className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-gray-700">{product.data.shop.owner.address}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -495,8 +470,8 @@ const ProductDetails = () => {
                                             // Fallback for browsers that don't support Web Share API
                                             const shareUrl = window.location.href;
                                             navigator.clipboard.writeText(shareUrl)
-                                                .then(() => customToast('Link copie d to clipboard!', 'success', 'loading...'))
-                                                .catch(() => customToast('Failed to copy link', 'error', 'loading...'));
+                                                .then(() => toast.success('Link copied to clipboard!'))
+                                                .catch(() => toast.error('Failed to copy link'));
                                         }
                                     }}>Share</span>
                                 </button>

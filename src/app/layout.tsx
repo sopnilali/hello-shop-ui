@@ -29,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${notoSerifBengali.variable} ${roboto.variable} font-roboto`}>
+    <html lang="en" >
+      <body className={`${notoSerifBengali.variable} ${roboto.variable} font-roboto`} suppressHydrationWarning >
         <ProvidersWrapper>
           {children}
         </ProvidersWrapper>

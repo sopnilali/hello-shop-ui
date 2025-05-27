@@ -44,3 +44,46 @@ body {
 }
 
 
+
+@layer base {
+  .container {
+    width: 100%;
+    @media (width >= 40rem) {
+      max-width: 40rem;
+    }
+    @media (width >= 48rem) {
+      max-width: 48rem;
+    }
+    @media (width >= 64rem) {
+      max-width: 64rem;
+    }
+    @media (width >= 80rem) {
+      max-width: 80rem;
+    }
+    @media (width >= 96rem) {
+      max-width: 96rem;
+    }
+  }
+
+  .blog-content h1,
+  .blog-content h2,
+  .blog-content h3,
+  .blog-content p,
+  .blog-content ul,
+  .blog-content ol,
+  .blog-content li,
+  .blog-content blockquote,
+  .blog-content code,
+  .blog-content pre {
+    @apply text-gray-800;
+  }
+
+  .blog-content a {
+    @apply text-blue-600;
+  }
+
+  .blog-content code {
+    @apply bg-gray-100  text-gray-900 px-1 rounded;
+  }
+}
+

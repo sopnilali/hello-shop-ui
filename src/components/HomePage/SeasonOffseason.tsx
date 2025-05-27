@@ -9,8 +9,8 @@ import '@smastrom/react-rating/style.css'
 import { ProductCard } from '../Modules/Products/ProductCard'
 
 const SeasonOffseason = () => {
-  const { data: seasonProducts, isLoading: seasonLoading } = useAllProductsQuery({ categoryId: '04d19b36-f74e-4a43-aaab-8cc7171bd693' })
-  const { data: offseasonProducts, isLoading: offseasonLoading } = useAllProductsQuery({ categoryId: '35cc6647-a818-4e4e-8eaf-663f74287fe7' })
+  const { data: seasonProducts, isLoading: seasonLoading } = useAllProductsQuery({ categoryId: '50ce283a-7d90-4181-ba3f-82f0c6a651c0' })
+  const { data: offseasonProducts, isLoading: offseasonLoading } = useAllProductsQuery({ categoryId: '625388a5-1f3d-48c2-95cc-82e704b828ca' })
 
   // 5 cards per row
   const gridClass = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"

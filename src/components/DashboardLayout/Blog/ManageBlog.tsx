@@ -9,6 +9,7 @@ import DeleteBlogModal from '@/components/Modals/DeleteBlogModal'
 import BlogFormModal from '@/components/Modals/BlogFormModal'
 import { motion, AnimatePresence } from 'framer-motion'
 import LoadingSpinner from '@/components/Shared/LoadingSpinner'
+import { useGetAllBlogCategoriesQuery } from '@/components/Redux/features/blogcategory/blogcategoryApi'
 
 const modalMotionProps = {
   initial: { opacity: 0, scale: 0.95 },
@@ -58,6 +59,12 @@ const titleVariants = {
 
 const ManageBlog = () => {
   const { data: blogs, isLoading, isError, refetch } = useGetAllBlogsQuery(undefined)
+  const { data: categories } = useGetAllBlogCategoriesQuery(undefined)
+  console.log(categories?.data)
+  const categoryOptions = categories?.data?.map((category: any) => ({
+    value: category.id,
+    label: category.name
+  }))
   const [addBlog] = useAddBlogMutation()
   const [updateBlog] = useUpdateBlogMutation()
   const [editorUpload] = useEditorUploadMutation()
@@ -68,6 +75,7 @@ const ManageBlog = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    categoryId: '',
     thumbnail: null as File | null
   })
 
@@ -98,7 +106,8 @@ const ManageBlog = () => {
       const submitFormData = new FormData();
       submitFormData.append('data', JSON.stringify({
         title: formData.title,
-        content: formData.content
+        content: formData.content,
+        categoryId: formData.categoryId
       }));
       
       if (formData.thumbnail) {
@@ -123,7 +132,7 @@ const ManageBlog = () => {
       setIsModalOpen(false);
       setIsUpdateMode(false);
       setSelectedBlogId('');
-      setFormData({ title: '', content: '', thumbnail: null });
+      setFormData({ title: '', content: '', categoryId: '', thumbnail: null });
       refetch();
     } catch (error) {
       toast.error(isUpdateMode ? 'Failed to update blog post' : 'Failed to add blog post');
@@ -135,6 +144,7 @@ const ManageBlog = () => {
     setFormData({
       title: blog.title,
       content: blog.content,
+      categoryId: blog.categoryId || '',
       thumbnail: null
     });
     setIsUpdateMode(true);
@@ -169,10 +179,10 @@ const ManageBlog = () => {
     setIsModalOpen(false);
     setIsUpdateMode(false);
     setSelectedBlogId('');
-    setFormData({ title: '', content: '', thumbnail: null });
+    setFormData({ title: '', content: '', categoryId: '', thumbnail: null });
   };
 
-  const handleFormDataChange = (data: { title?: string; content?: string; thumbnail?: File | null }) => {
+  const handleFormDataChange = (data: { title?: string; content?: string; categoryId?: string; thumbnail?: File | null }) => {
     setFormData(prev => ({
       ...prev,
       ...data
@@ -222,7 +232,7 @@ const ManageBlog = () => {
                 <tr>
                   <td colSpan={6}>
                     <div className="flex justify-center items-center py-4 text-gray-400">
-                      <LoadingSpinner />
+                      {/* <LoadingSpinner /> */}
                     </div>
                   </td>
                 </tr>
@@ -309,6 +319,7 @@ const ManageBlog = () => {
               onSubmit={handleSubmit}
               onFormDataChange={handleFormDataChange}
               onImageUpload={handleImageUpload}
+              categoryOptions={categoryOptions || []}
             />
           </motion.div>
         )}

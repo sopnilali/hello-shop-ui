@@ -9,7 +9,7 @@ import SeasonOffseason from '@/components/HomePage/SeasonOffseason'
 
 const Homepage = () => {
   return (
-    <div>
+    <div className=' container mx-auto'>
       <HeroSection />
       <BrandsSection/>
       <BannerAds/>

@@ -108,7 +108,7 @@ const PrimaryNavbar = () => {
   return (
     <>
       <div className="h-[72px]" /> {/* Placeholder div for navbar height */}
-      <nav className={`w-full flex items-center px-2 sm:px-4 lg:px-8 py-4 bg-white shadow-sm z-50 fixed top-0 left-0 right-0 transition-all duration-300`}>
+      <nav className={`w-full flex items-center px-2 sm:px-4 lg:px-4 py-4 bg-white shadow-sm z-50 fixed top-0 left-0 right-0 transition-all duration-300`}>
         <div className="container mx-auto flex items-center justify-between">
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
@@ -119,11 +119,12 @@ const PrimaryNavbar = () => {
 
           {/* Logo */}
           <div className="flex-1 lg:flex-none flex justify-center lg:justify-start items-center">
-            <Link href="/" className="flex items-center text-xl sm:text-2xl font-bold text-black">
+            <Link href="/" className="flex items-center text-lg sm:text-xl lg:text-2xl font-bold text-black lg:pr-3">
               Hello
-              <span className="text-[#ff4500] rotate-12 inline-block" style={{ fontSize: 24, margin: "0 2px" }}>✔</span>
+              <span className="text-[#ff4500] rotate-12 inline-block" style={{ fontSize: "1.2em", margin: "0 2px" }}>✔</span>
               Shop
             </Link>
+            
           </div>
 
           {/* Navigation Links */}

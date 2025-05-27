@@ -5,7 +5,7 @@ import Link from 'next/link';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-white text-black mt-4">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto  py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
@@ -108,7 +108,7 @@ const Footer: React.FC = () => {
       </div>
       {/* Bottom Bar */}
       <div className="border-t border-gray-800 mt-12 bg-white">
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4'>
+        <div className='container mx-auto py-4'>
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-black text-sm">
               © {new Date().getFullYear()} Hello Shop. All rights reserved.

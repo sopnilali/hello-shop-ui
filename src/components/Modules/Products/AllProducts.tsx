@@ -226,8 +226,8 @@ const AllProducts: React.FC = () => {
 
   // Filter Sidebar as a component for reuse
   const FilterSidebar = (
-    <aside className='w-full rounded-lg p-2 mb-6 md:mb-0 h-full overflow-y-auto'>
-      <div className='flex items-center justify-between mb-6'>
+    <aside className='w-full  rounded-lg p-2 mb-6 md:mb-0 h-full overflow-y-auto'>
+      <div className='flex items-center justify-between mb-6 '>
         <h2 className='text-xl font-bold flex items-center gap-2'>
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-.293.707l-6.414 6.414A1 1 0 0 0 13 13.414V19a1 1 0 0 1-1.447.894l-2-1A1 1 0 0 1 9 18v-4.586a1 1 0 0 0-.293-.707L2.293 6.707A1 1 0 0 1 2 6V4z" /></svg>
           Filter
@@ -419,9 +419,9 @@ const AllProducts: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 container mx-auto">
       {/* Top Banner */}
-      <div className="relative container mx-auto rounded-md w-full h-[300px] mb-8 overflow-hidden mt-6">
+      <div className="relative container mx-auto rounded-md w-full h-[300px] mb-8 overflow-hidden mt-6 ">
                         <Image
           src="https://t4.ftcdn.net/jpg/07/05/76/83/360_F_705768379_6gKmh8xMy2TcauvQnUAhoCh9jnS9ci0n.jpg"
           alt="Products Banner"
@@ -429,8 +429,8 @@ const AllProducts: React.FC = () => {
                           className="object-cover"
           priority
                         />
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <div className="text-center">
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center ">
+          <div className="text-center ">
             <h1 className="text-4xl font-bold text-white mb-4">Our Products</h1>
             <p className="text-white text-lg">Discover our amazing collection of products</p>
                       </div>

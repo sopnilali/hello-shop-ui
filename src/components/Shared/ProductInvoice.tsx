@@ -6,23 +6,23 @@ import { useGetPaymentWithVerifyQuery } from "@/components/Redux/features/paymen
 
 // Theme base color variables (adjusted for a softer, more modern look)
 const BASE_BG = "bg-[#181c2a]";
-const BASE_CARD = "bg-[#23283a]";
+const BASE_CARD = "bg-white";
 const BASE_ACCENT = "bg-orange-500";
 const BASE_ACCENT_HOVER = "bg-orange-600";
 const BASE_ACCENT_TEXT = "text-orange-500";
-const BASE_TEXT = "text-white";
-const BASE_TEXT_SUBTLE = "text-white/70";
-const BASE_BORDER = "border-white/10";
+const BASE_TEXT = "text-black";
+const BASE_TEXT_SUBTLE = "text-black/70";
+const BASE_BORDER = "border-black/10";
 const BASE_GRADIENT = "bg-orange-500";
 
 // Font size utility classes for easy adjustment
-const FONT_HEADER = "text-2xl sm:text-3xl font-bold";
+const FONT_HEADER = "text-2xl sm:text-3xl font-bold text-black";
 const FONT_SUBHEADER = "text-xl sm:text-2xl font-semibold";
-const FONT_LABEL = "text-base sm:text-lg";
-const FONT_BODY = "text-base sm:text-lg";
-const FONT_SMALL = "text-sm sm:text-base";
-const FONT_XSMALL = "text-xs sm:text-sm";
-const FONT_TOTAL = "text-lg sm:text-xl font-bold";
+const FONT_LABEL = "text-base sm:text-lg text-black";
+const FONT_BODY = "text-base sm:text-lg text-black";
+const FONT_SMALL = "text-sm sm:text-base text-black";
+const FONT_XSMALL = "text-xs sm:text-sm text-black";
+const FONT_TOTAL = "text-lg sm:text-xl font-bold text-black";
 
 const ProductInvoice = () => {
   const searchParams = useSearchParams();
@@ -34,7 +34,7 @@ const ProductInvoice = () => {
 
   if (!order) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${BASE_BG}`}>
+      <div className={`min-h-[] flex items-center justify-center `}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity }}
@@ -49,7 +49,7 @@ const ProductInvoice = () => {
     (sum: number, item: any) => sum + (item.price * (item.quantity)),
     0
   );
-  
+
   const discount = order.discount || 0;
   const total = order.total || subtotal || 0;
 
@@ -62,8 +62,10 @@ const ProductInvoice = () => {
         <div className={`p-6 ${BASE_GRADIENT} ${BASE_TEXT}`}>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
             <div className="flex items-center gap-2">
-              <FiBox className="text-3xl sm:text-4xl" />
-              <h1 className={FONT_HEADER}>Chapai Mango Bazar</h1>
+             
+              <h1 className={FONT_HEADER}>              Hello
+                <span className="text-[#ffffff] rotate-12 inline-block" style={{ fontSize: "1.2em", margin: "0 2px" }}>✔</span>
+                Shop</h1>
             </div>
             <div className="text-left md:text-right">
               <h2 className={FONT_SUBHEADER}>Invoice</h2>
@@ -132,14 +134,6 @@ const ProductInvoice = () => {
                 {order?.paymentMethod?.replace(/_/g, " ") || "-"}
               </span>
             </div>
-            {order?.couponId && (
-              <div className="flex flex-wrap justify-between md:block">
-                <span className={`${BASE_TEXT_SUBTLE} ${FONT_SMALL}`}>Coupon:</span>
-                <span className={`font-medium block pl-1 md:inline break-all ${FONT_BODY}`}>
-                  {order?.couponId}
-                </span>
-              </div>
-            )}
           </div>
         </div>
 
@@ -149,16 +143,16 @@ const ProductInvoice = () => {
             <table className="w-full min-w-[340px]">
               <thead className="bg-white/5">
                 <tr>
-                  <th className={`text-left py-2 px-2 text-white font-medium ${FONT_SMALL}`}>
+                  <th className={`text-left py-2 px-2 text-black font-medium ${FONT_SMALL}`}>
                     Product
                   </th>
-                  <th className={`text-center py-2 px-2 text-white font-medium ${FONT_SMALL}`}>
+                  <th className={`text-center py-2 px-2 text-black font-medium ${FONT_SMALL}`}>
                     Quantity
                   </th>
-                  <th className={`text-right py-2 px-2 text-white font-medium ${FONT_SMALL}`}>
+                  <th className={`text-right py-2 px-2 text-black font-medium ${FONT_SMALL}`}>
                     Price
                   </th>
-                  <th className={`text-right py-2 px-2 text-white font-medium ${FONT_SMALL}`}>
+                  <th className={`text-right py-2 px-2 text-black font-medium ${FONT_SMALL}`}>
                     Total
                   </th>
                 </tr>
@@ -237,9 +231,9 @@ const ProductInvoice = () => {
 
         {/* Footer */}
         <div className={`p-6 bg-white/5 border-t ${BASE_BORDER}`}>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm sm:text-base text-white/60">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm sm:text-base text-black/60">
             <div className="text-center md:text-left">
-              <p>Thank you for shopping with Chapai Mango Bazar!</p>
+              <p>Thank you for shopping with Hello ✔ Shop!</p>
               <p>For help, call: +880 1711-111111</p>
             </div>
             <button

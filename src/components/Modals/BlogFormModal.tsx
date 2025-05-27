@@ -7,12 +7,14 @@ interface BlogFormModalProps {
   formData: {
     title: string;
     content: string;
+    categoryId: string;
     thumbnail: File | null;
   };
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
-  onFormDataChange: (data: { title?: string; content?: string; thumbnail?: File | null }) => void;
+  onFormDataChange: (data: { title?: string; content?: string; categoryId?: string; thumbnail?: File | null }) => void;
   onImageUpload: (file: File) => Promise<string>;
+  categoryOptions: { value: string; label: string; }[];
 }
 
 const BlogFormModal = ({
@@ -22,7 +24,8 @@ const BlogFormModal = ({
   onClose,
   onSubmit,
   onFormDataChange,
-  onImageUpload
+  onImageUpload,
+  categoryOptions
 }: BlogFormModalProps) => {
   if (!isOpen) return null;
 
@@ -86,6 +89,21 @@ const BlogFormModal = ({
                 <p className="text-sm text-gray-600">Selected file: {formData.thumbnail.name}</p>
               </div>
             )}
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-900">Category</label>
+            <select
+              value={formData.categoryId}
+              onChange={(e) => onFormDataChange({ categoryId: e.target.value })}
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border  border-gray-400 rounded-lg focus:ring-2 focus:ring-gray-600 focus:border-gray-600 transition-colors text-sm sm:text-base  text-gray-900 placeholder:text-gray-900"
+            >
+              <option value="">Select Category</option>
+              {categoryOptions.map((option) => (
+                <option key={option.value} value={option.value} className='text-gray-900'>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-300">
