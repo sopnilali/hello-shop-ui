@@ -1,4 +1,4 @@
-#Core Features for an Hello Shop Ecomerce Website
+# Core Features for an Hello Shop Ecomerce Website
 
 # User Authentication & Authorization
 Description: Secure registration, login, and role-based access (admin, seller and customer).
