@@ -221,7 +221,7 @@ const ManageCheckout = () => {
             <div className="container mx-auto px-4 py-8 text-center">
                 <h1 className="text-2xl font-semibold mb-4">Your cart is empty</h1>
                 <button
-                    onClick={() => router.push('/products')}
+                    onClick={() => router.push('/product')}
                     className="text-orange-500 hover:text-orange-600"
                 >
                     Continue Shopping
